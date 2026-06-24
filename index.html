@@ -6,6 +6,9 @@
 <title>United Bela Vista — Sistema de Equipes</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--brown:#976655;--brown-d:#7A4F3F;--brown-l:#C4968A;--brown-pale:#F0EAE7;--bg:#F8F5F3;--text:#1A1A1A;--gray:#888;}
@@ -205,6 +208,33 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .create-user-card{background:#fff;border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.06);}
 .create-user-card h3{font-size:14px;font-weight:600;color:var(--text);margin-bottom:16px;}
 
+/* ── UGROUPS LAYOUT ── */
+.ugroups-layout{display:flex;height:calc(100vh - 56px);overflow:hidden;}
+.ugroups-sidebar{width:300px;flex-shrink:0;background:#fff;border-right:1px solid rgba(151,102,85,.12);display:flex;flex-direction:column;overflow:hidden;}
+.ug-list-item{padding:12px 16px;border-bottom:1px solid rgba(151,102,85,.07);cursor:pointer;transition:background .15s;}
+.ug-list-item:hover{background:var(--brown-pale);}
+.ug-list-item.active{background:var(--brown-pale);border-left:3px solid var(--brown);}
+.ug-list-item h4{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.ug-list-item p{font-size:11px;color:var(--gray);}
+.ug-detail{padding:4px 0;}
+.ug-detail h4{font-size:13px;font-weight:600;color:var(--brown);text-transform:uppercase;letter-spacing:1px;margin:12px 0 6px;}
+.ug-person{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.ug-person-photo{width:38px;height:38px;border-radius:50%;background:var(--brown-pale);border:2px solid rgba(151,102,85,.25);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.ug-person-photo img{width:100%;height:100%;object-fit:cover;}
+.ug-person-info strong{font-size:13px;font-weight:600;display:block;}
+.ug-person-info span{font-size:11px;color:var(--gray);}
+.ug-part-list{border:1px solid rgba(151,102,85,.12);border-radius:10px;overflow:hidden;}
+.ug-part-row{display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(151,102,85,.07);font-size:12px;}
+.ug-part-row:last-child{border-bottom:none;}
+.ug-part-row span:last-child{color:var(--gray);}
+/* Leaflet override */
+.leaflet-container{font-family:'Inter',sans-serif;}
+.ug-map-popup strong{font-family:'Playfair Display',serif;font-size:14px;display:block;margin-bottom:4px;}
+.ug-map-popup p{font-size:11px;color:var(--gray);}
+/* Membros photo in table */
+.mem-photo-thumb{width:34px;height:34px;border-radius:50%;background:var(--brown-pale);border:2px solid rgba(151,102,85,.2);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.mem-photo-thumb img{width:100%;height:100%;object-fit:cover;}
+
 /* ── DASH STATS ── */
 .dash-stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(151,102,85,.1);}
 .dash-stat{background:var(--brown-pale);border-radius:8px;padding:6px 12px;text-align:center;flex:1;min-width:90px;}
@@ -273,10 +303,13 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
       <span class="nav-title">Bela Vista</span>
     </div>
     <div class="nav-tabs">
-      <button class="nav-tab active" onclick="showTab('organograma',this)">🏛 Organograma</button>
       <button class="nav-tab" onclick="showTab('dashboard',this)">📊 Dashboard</button>
-      <button class="nav-tab hidden" id="tab-btn-users" onclick="showTab('usuarios',this)">👥 Usuários</button>
-      <button class="nav-tab hidden" id="tab-btn-config" onclick="showTab('config',this)">⚙ Configurações</button>
+      <button class="nav-tab active" onclick="showTab('organograma',this)">🏛 Organograma</button>
+      <button class="nav-tab" onclick="showTab('hierarquia',this)">📋 Hierarquia</button>
+      <button class="nav-tab" onclick="showTab('ugroups',this)">📍 uGroups</button>
+      <button class="nav-tab" onclick="showTab('membros',this)">👤 Membros</button>
+      <button class="nav-tab hidden" id="tab-btn-users" onclick="showTab('usuarios',this)">⚙ Usuários</button>
+      <button class="nav-tab hidden" id="tab-btn-config" onclick="showTab('config',this)">⚙ Config</button>
     </div>
     <div class="nav-user">
       <span class="nav-user-name" id="nav-user-name">—</span>
@@ -318,8 +351,16 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
   <!-- TAB: DASHBOARD -->
   <div id="pane-dashboard" class="tab-pane">
     <div class="dash-pane">
-      <h2>Dashboard de Membresia</h2>
-      <p class="dash-sub">Igreja United Bela Vista</p>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px;">
+        <div>
+          <h2>Dashboard de Membresia</h2>
+          <p class="dash-sub">Igreja United Bela Vista</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:4px;">
+          <button class="btn-outline" style="font-size:11px;padding:7px 14px;" onclick="exportDashXLSX()">⬇ Exportar XLSX</button>
+          <label class="btn-outline" style="font-size:11px;padding:7px 14px;cursor:pointer;">⬆ Importar<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importDashXLSX(this)"></label>
+        </div>
+      </div>
 
       <!-- Add Report -->
       <div class="report-card">
@@ -446,7 +487,192 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
     </div>
   </div>
 
+  <!-- TAB: HIERARQUIA -->
+  <div id="pane-hierarquia" class="tab-pane">
+    <div class="dash-pane">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px;">
+        <div><h2>Equipe & Hierarquia</h2><p class="dash-sub">Lista de todos os membros da equipe</p></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-outline" style="font-size:11px;padding:7px 14px;" onclick="exportHierXLSX()">⬇ Exportar XLSX</button>
+          <label class="btn-outline" style="font-size:11px;padding:7px 14px;cursor:pointer;">⬆ Importar<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importHierXLSX(this)"></label>
+          <button class="btn-submit" onclick="openAddMembro()">+ Adicionar à Equipe</button>
+        </div>
+      </div>
+      <div class="report-card" style="padding:16px 20px;margin-bottom:16px;">
+        <input id="hier-search" class="login-field" type="text" placeholder="🔍 Buscar por nome, nível ou função..." oninput="renderHierList()" style="margin:0;max-width:360px;">
+      </div>
+      <div class="users-table-wrap">
+        <table class="users-table">
+          <thead><tr><th>Foto</th><th>Nome</th><th>Nível</th><th>Função</th><th>Ações</th></tr></thead>
+          <tbody id="hier-list"><tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:20px 16px;">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: UGROUPS -->
+  <div id="pane-ugroups" class="tab-pane">
+    <div class="ugroups-layout">
+      <div class="ugroups-sidebar">
+        <div style="padding:16px 16px 8px;">
+          <h2 style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:4px;">Mapa de uGroups</h2>
+          <p style="font-size:10px;color:var(--gray);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:12px;">São Paulo · Pequenos Grupos</p>
+          <input id="ug-search" class="login-field" type="text" placeholder="🔍 Buscar uGroup..." oninput="filterUGroups()" style="margin:0 0 10px;">
+          <button class="btn-submit" style="width:100%;font-size:12px;padding:9px;" onclick="openAddUGroup()">+ Novo uGroup</button>
+        </div>
+        <div id="ug-list" style="overflow-y:auto;flex:1;"></div>
+        <div style="padding:10px 16px;border-top:1px solid rgba(151,102,85,.1);display:flex;gap:8px;">
+          <button class="btn-outline" style="flex:1;font-size:11px;padding:7px;" onclick="exportUGroupsXLSX()">⬇ Exportar XLSX</button>
+          <label class="btn-outline" style="flex:1;font-size:11px;padding:7px;text-align:center;cursor:pointer;">⬆ Importar<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importUGroupsXLSX(this)"></label>
+        </div>
+      </div>
+      <div id="ug-map" style="flex:1;min-height:500px;"></div>
+    </div>
+  </div>
+
+  <!-- TAB: MEMBROS -->
+  <div id="pane-membros" class="tab-pane">
+    <div class="dash-pane">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px;">
+        <div><h2>Membros</h2><p class="dash-sub">Cadastro de membros da Igreja United Bela Vista</p></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-outline" style="font-size:11px;padding:7px 14px;" onclick="exportMembrosXLSX()">⬇ Exportar XLSX</button>
+          <label class="btn-outline" style="font-size:11px;padding:7px 14px;cursor:pointer;">⬆ Importar<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importMembrosXLSX(this)"></label>
+          <button class="btn-submit" onclick="openAddMembroForm()">+ Novo Membro</button>
+        </div>
+      </div>
+      <div class="report-card" style="padding:16px 20px;margin-bottom:16px;">
+        <input id="mem-search" class="login-field" type="text" placeholder="🔍 Buscar por nome, telefone..." oninput="renderMembrosList()" style="margin:0;max-width:360px;">
+      </div>
+      <div class="users-table-wrap">
+        <table class="users-table">
+          <thead><tr><th>Foto</th><th>Nome</th><th>Sexo</th><th>Telefone</th><th>Como Conheceu</th><th>uGroup</th><th>Ações</th></tr></thead>
+          <tbody id="membros-list"><tr><td colspan="7" style="color:var(--gray);font-size:12px;padding:20px 16px;">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
 </div><!-- #app -->
+
+<!-- MODAL: ADICIONAR À HIERARQUIA -->
+<div id="modal-hier" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:8000;align-items:center;justify-content:center;">
+  <div class="modal-box" style="width:420px;max-height:90vh;overflow-y:auto;">
+    <button class="modal-close" onclick="document.getElementById('modal-hier').style.display='none'">×</button>
+    <h3 id="modal-hier-title">Adicionar à Equipe</h3>
+    <input type="hidden" id="hier-edit-id">
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>Foto</label>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div id="hier-foto-preview" style="width:52px;height:52px;border-radius:50%;background:var(--brown-pale);border:2px solid rgba(151,102,85,.3);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:22px;">👤</div>
+        <label class="btn-outline" style="font-size:11px;padding:6px 14px;cursor:pointer;">📷 Foto<input type="file" accept="image/*" style="display:none" onchange="previewHierFoto(this)"></label>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;"><label>Nome</label><input class="login-field" id="hier-nome" type="text" placeholder="Nome completo" style="margin:0;"></div>
+    <div class="form-group" style="margin-bottom:12px;"><label>Nível (Ex: Pastor, LTP, Líder)</label><input class="login-field" id="hier-nivel" type="text" placeholder="Ex: Pastor Associado" style="margin:0;"></div>
+    <div class="form-group" style="margin-bottom:12px;"><label>Função</label><input class="login-field" id="hier-funcao" type="text" placeholder="Ex: Pastora Associada" style="margin:0;"></div>
+    <div class="form-group" style="margin-bottom:16px;"><label>Reporta a (parent no organograma)</label>
+      <select class="login-field" id="hier-parent" style="margin:0;"></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-submit" onclick="saveHierMembro()">Salvar</button>
+      <button class="btn-outline" onclick="document.getElementById('modal-hier').style.display='none'">Cancelar</button>
+    </div>
+    <div id="hier-msg" class="form-success" style="margin-top:8px;"></div>
+  </div>
+</div>
+
+<!-- MODAL: UGROUP DETALHES / EDITAR -->
+<div id="modal-ugroup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:8000;align-items:center;justify-content:center;">
+  <div class="modal-box" style="width:500px;max-height:90vh;overflow-y:auto;">
+    <button class="modal-close" onclick="closeUGroupModal()">×</button>
+    <h3 id="ug-modal-title">uGroup</h3>
+    <div id="ug-modal-body"></div>
+  </div>
+</div>
+
+<!-- MODAL: MEMBRO DETALHES / EDITAR -->
+<div id="modal-membro" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:8000;align-items:center;justify-content:center;">
+  <div class="modal-box" style="width:460px;max-height:90vh;overflow-y:auto;">
+    <button class="modal-close" onclick="document.getElementById('modal-membro').style.display='none'">×</button>
+    <h3 id="mem-modal-title">Cadastro de Membro</h3>
+    <input type="hidden" id="mem-edit-id">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+      <div id="mem-foto-preview" style="width:64px;height:64px;border-radius:50%;background:var(--brown-pale);border:2px solid rgba(151,102,85,.3);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:28px;">👤</div>
+      <label class="btn-outline" style="font-size:11px;padding:6px 14px;cursor:pointer;">📷 Foto<input type="file" accept="image/*" style="display:none" onchange="previewMemFoto(this)"></label>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Nome Completo</label><input class="login-field" id="mem-nome" style="margin:0;" placeholder="Nome completo"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Sexo</label>
+        <select class="login-field" id="mem-sexo" style="margin:0;">
+          <option value="">Selecione</option><option value="M">Masculino</option><option value="F">Feminino</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Data de Nascimento</label><input class="login-field" id="mem-nasc" type="date" style="margin:0;"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Telefone</label><input class="login-field" id="mem-tel" style="margin:0;" placeholder="(11) 9 0000-0000"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Como Conheceu a Igreja</label>
+        <select class="login-field" id="mem-como" style="margin:0;">
+          <option value="">Selecione</option>
+          <option value="Redes Sociais">Redes Sociais</option>
+          <option value="Indicação">Indicação</option>
+          <option value="Mora no Bairro">Mora no Bairro</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row" id="mem-como-outro-row" style="display:none;">
+      <div class="form-group"><label>Especifique</label><input class="login-field" id="mem-como-outro" style="margin:0;" placeholder="Como conheceu..."></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Faz parte de algum uGroup?</label>
+        <select class="login-field" id="mem-ugroup" style="margin:0;">
+          <option value="">Não</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn-submit" onclick="saveMembroForm()">Salvar</button>
+      <button class="btn-outline" onclick="document.getElementById('modal-membro').style.display='none'">Cancelar</button>
+    </div>
+    <div id="mem-msg" class="form-success" style="margin-top:8px;"></div>
+  </div>
+</div>
+
+<!-- MODAL: ADICIONAR UGROUP FORM -->
+<div id="modal-ug-form" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:8001;align-items:center;justify-content:center;">
+  <div class="modal-box" style="width:480px;max-height:90vh;overflow-y:auto;">
+    <button class="modal-close" onclick="document.getElementById('modal-ug-form').style.display='none'">×</button>
+    <h3 id="ug-form-title">Novo uGroup</h3>
+    <input type="hidden" id="ug-edit-id">
+    <div class="form-group" style="margin-bottom:12px;"><label>Nome do uGroup</label><input class="login-field" id="ug-nome" style="margin:0;" placeholder="Ex: uGroup Itaquera"></div>
+    <div class="form-group" style="margin-bottom:12px;"><label>Endereço (bairro ou rua, São Paulo)</label><input class="login-field" id="ug-endereco" style="margin:0;" placeholder="Ex: Rua das Flores, 123 - Itaquera, SP"></div>
+    <div class="form-row">
+      <div class="form-group" style="margin-bottom:12px;"><label>Líder (nome)</label><input class="login-field" id="ug-lider" style="margin:0;" placeholder="Nome do líder"></div>
+      <div class="form-group" style="margin-bottom:12px;"><label>Anfitrião (nome)</label><input class="login-field" id="ug-anf" style="margin:0;" placeholder="Nome do anfitrião"></div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;"><label>Foto do Líder</label>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div id="ug-lider-foto-prev" style="width:44px;height:44px;border-radius:50%;background:var(--brown-pale);border:2px solid rgba(151,102,85,.3);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:18px;">👤</div>
+        <label class="btn-outline" style="font-size:11px;padding:6px 12px;cursor:pointer;">📷 Foto<input type="file" accept="image/*" style="display:none" onchange="previewUGFoto(this)"></label>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>Participantes (um por linha — Nome | Função)</label>
+      <textarea id="ug-participantes" style="width:100%;padding:9px 12px;border:1.5px solid rgba(151,102,85,.2);border-radius:9px;font-family:'Inter',sans-serif;font-size:12px;background:#FAF7F5;color:var(--text);resize:vertical;min-height:100px;outline:none;" placeholder="Wesley | Líder&#10;Larissa | Líder&#10;Tiago Brandão | Voluntário&#10;Gleusa | Membro&#10;Matilda | Participante"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-submit" onclick="saveUGroup()">Salvar uGroup</button>
+      <button class="btn-outline" onclick="document.getElementById('modal-ug-form').style.display='none'">Cancelar</button>
+    </div>
+    <div id="ug-form-msg" class="form-success" style="margin-top:8px;"></div>
+  </div>
+</div>
 
 <!-- FORMAT BAR -->
 <div id="format-bar">
@@ -588,6 +814,55 @@ async function doLogout() {
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !document.getElementById('login-screen').classList.contains('hidden')) doLogin();
 });
+
+async function exportDashXLSX() {
+  const { data } = await sb.from('cultos').select('*').order('data');
+  if (!data || !data.length) { alert('Nenhum relatório para exportar.'); return; }
+  const ws = XLSX.utils.json_to_sheet(data.map(r => ({
+    Data:           r.data,
+    Tipo:           r.tipo,
+    Pastores:       r.pastores || 0,
+    Líderes:        r.lideres || 0,
+    Voluntários:    r.voluntarios || 0,
+    Membros:        r.membros || 0,
+    Visitantes:     r.visitantes || 0,
+    Participantes:  r.participantes || 0
+  })));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Cultos');
+  XLSX.writeFile(wb, 'dashboard-bela-vista.xlsx');
+}
+
+async function importDashXLSX(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const wb   = XLSX.read(e.target.result, { type: 'array' });
+    const ws   = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws);
+    let ok = 0;
+    for (const row of rows) {
+      if (!row['Data'] || !row['Tipo']) continue;
+      const { error } = await sb.from('cultos').insert({
+        data:          row['Data'],
+        tipo:          String(row['Tipo']).toLowerCase(),
+        pastores:      parseInt(row['Pastores'])     || 0,
+        lideres:       parseInt(row['Líderes'])      || 0,
+        voluntarios:   parseInt(row['Voluntários'])  || 0,
+        membros:       parseInt(row['Membros'])      || 0,
+        visitantes:    parseInt(row['Visitantes'])   || 0,
+        participantes: parseInt(row['Participantes'])|| 0,
+        created_by:    currentUser?.id
+      });
+      if (!error) ok++;
+    }
+    alert(`${ok} relatório(s) importado(s) com sucesso!`);
+    loadDashboard();
+  };
+  reader.readAsArrayBuffer(input.files[0]);
+  input.value = '';
+}
+
 
 // ── SETTINGS ──
 async function loadSettings(isAdmin) {
@@ -760,11 +1035,16 @@ function applyPermissions(canEdit) {
 function showTab(id, btn) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
-  document.getElementById('pane-' + id).classList.add('active');
+  const pane = document.getElementById('pane-' + id);
+  if (pane) pane.classList.add('active');
   if (btn) btn.classList.add('active');
-  document.getElementById('main-toolbar').style.display = id === 'organograma' ? '' : 'none';
-  if (id === 'dashboard') loadDashboard();
-  if (id === 'usuarios') loadUsers();
+  const toolbar = document.getElementById('main-toolbar');
+  if (toolbar) toolbar.style.display = id === 'organograma' ? '' : 'none';
+  if (id === 'dashboard')   loadDashboard();
+  if (id === 'usuarios')    loadUsers();
+  if (id === 'hierarquia')  loadHierarquia();
+  if (id === 'ugroups')     loadUGroups();
+  if (id === 'membros')     loadMembros();
 }
 
 // ── PROFILE MODAL ──
@@ -1594,7 +1874,7 @@ function initChart(savedData) {
   initAutoSave();
 }
 
-// ── DRAG & DROP (mouse events — funciona em todos os browsers) ──
+// ── DRAG & DROP (mouse events) ──
 let _dragSrc   = null;
 let _dragClone = null;
 let _dragStartX = 0;
@@ -1603,7 +1883,6 @@ let _isDragging = false;
 
 function initDragDrop() {
   const root = document.getElementById('org-root');
-  // Remove listeners antigos para evitar duplicar
   root.removeEventListener('mousedown', _onDragMouseDown, true);
   root.addEventListener('mousedown', _onDragMouseDown, true);
 }
@@ -1627,39 +1906,26 @@ function _onDragMouseMove(e) {
   if (!_dragSrc) return;
   const dx = e.clientX - _dragStartX;
   const dy = e.clientY - _dragStartY;
-  // Inicia o arrasto só após mover 5px
   if (!_isDragging && Math.sqrt(dx*dx + dy*dy) < 5) return;
-
   if (!_isDragging) {
     _isDragging = true;
     _dragSrc.classList.add('dragging');
-    // Cria clone visual que segue o cursor
     const node = _dragSrc.querySelector('.org-node');
     _dragClone = node.cloneNode(true);
     const rect = node.getBoundingClientRect();
-    _dragClone.style.cssText = `
-      position:fixed;z-index:9999;pointer-events:none;
-      opacity:0.88;box-shadow:0 12px 36px rgba(0,0,0,.22);
-      border-radius:14px;transition:none;
-      width:${rect.width}px;
-      top:${rect.top}px;left:${rect.left}px;`;
+    _dragClone.style.cssText = `position:fixed;z-index:9999;pointer-events:none;opacity:0.88;box-shadow:0 12px 36px rgba(0,0,0,.22);border-radius:14px;transition:none;width:${rect.width}px;top:${rect.top}px;left:${rect.left}px;`;
     document.body.appendChild(_dragClone);
   }
-
-  // Move o clone
   const node = _dragSrc.querySelector('.org-node');
   const rect  = node.getBoundingClientRect();
   _dragClone.style.top  = (rect.top  + dy) + 'px';
   _dragClone.style.left = (rect.left + dx) + 'px';
-
-  // Destaca coluna alvo
   document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
   const underEls = document.elementsFromPoint(e.clientX, e.clientY);
   for (const el of underEls) {
     const tc = el.closest?.('.org-col');
     if (tc && tc !== _dragSrc && !_dragSrc.contains(tc)) {
-      tc.classList.add('drag-over');
-      break;
+      tc.classList.add('drag-over'); break;
     }
   }
 }
@@ -1667,13 +1933,10 @@ function _onDragMouseMove(e) {
 function _onDragMouseUp(e) {
   document.removeEventListener('mousemove', _onDragMouseMove, true);
   document.removeEventListener('mouseup',   _onDragMouseUp,   true);
-
   if (_dragClone) { _dragClone.remove(); _dragClone = null; }
-
   if (_isDragging && _dragSrc) {
     const targetCol = document.querySelector('.drag-over');
     document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-
     if (targetCol && targetCol !== _dragSrc && !_dragSrc.contains(targetCol)) {
       const targetNode = targetCol.querySelector(':scope > .org-node');
       const newDepth   = targetNode ? parseInt(targetNode.dataset.depth || '0') + 1 : 1;
@@ -1684,7 +1947,6 @@ function _onDragMouseUp(e) {
       }
       ch.appendChild(_dragSrc);
       _updateDepths(_dragSrc, newDepth);
-      // Remove .org-children vazios
       document.querySelectorAll('.org-children').forEach(chEl => {
         if (chEl.childElementCount === 0) {
           const prevVl = chEl.previousElementSibling;
@@ -1697,7 +1959,6 @@ function _onDragMouseUp(e) {
       scheduleChartSave();
     }
   }
-
   if (_dragSrc) { _dragSrc.classList.remove('dragging'); _dragSrc = null; }
   _isDragging = false;
 }
@@ -1708,6 +1969,656 @@ function _updateDepths(col, depth) {
   if (node) node.setAttribute('data-depth', d);
   const ch = col.querySelector(':scope > .org-children');
   if (ch) ch.querySelectorAll(':scope > .org-col').forEach(child => _updateDepths(child, depth + 1));
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// ABA HIERARQUIA
+// ══════════════════════════════════════════════════════════════════
+let _hierData = [];
+
+
+function extractFromTree(col, parentName) {
+  const node = col.querySelector(':scope > .org-node');
+  if (!node) return;
+  const name  = (node.querySelector('.node-name')?.textContent  || '').trim();
+  const level = (node.querySelector('.node-level')?.textContent || '').trim();
+  const role  = (node.querySelector('.node-role')?.textContent  || '').trim();
+  const img   = node.querySelector('.photo-circle img');
+  const photo = (img?.src && img.src.startsWith('data:')) ? img.src : null;
+  _hierData.push({ name, level, role, photo, parentName });
+  const ch = col.querySelector(':scope > .org-children');
+  if (ch) ch.querySelectorAll(':scope > .org-col').forEach(c => extractFromTree(c, name));
+}
+
+function loadHierarquia() {
+  _hierData = [];
+  document.querySelectorAll('#org-root > .org-col').forEach(col => extractFromTree(col, null));
+  renderHierList();
+}
+
+function renderHierList() {
+  const q = (document.getElementById('hier-search')?.value || '').toLowerCase();
+  const tbody = document.getElementById('hier-list');
+  const list = q
+    ? _hierData.filter(m => [m.name, m.level, m.role].join(' ').toLowerCase().includes(q))
+    : _hierData;
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:20px 16px;">Nenhum membro encontrado.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map((m, i) => `
+    <tr>
+      <td>${m.photo ? `<img src="${m.photo}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">` : '<span style="font-size:22px;">👤</span>'}</td>
+      <td style="font-weight:600;">${m.name || '—'}</td>
+      <td><span style="background:rgba(151,102,85,.1);color:var(--brown);padding:3px 8px;border-radius:20px;font-size:11px;">${m.level || '—'}</span></td>
+      <td style="font-size:12px;color:var(--gray2);">${m.role || '—'}</td>
+      <td><button class="btn-outline" style="font-size:11px;padding:4px 10px;" onclick="editHierMembro(${i})">✏ Editar</button></td>
+    </tr>`).join('');
+}
+
+function openAddMembro() {
+  const modal = document.getElementById('modal-hier');
+  document.getElementById('modal-hier-title').textContent = 'Adicionar à Equipe';
+  document.getElementById('hier-edit-id').value = '';
+  document.getElementById('hier-nome').value   = '';
+  document.getElementById('hier-nivel').value  = '';
+  document.getElementById('hier-funcao').value = '';
+  const fprev = document.getElementById('hier-foto-preview');
+  fprev.innerHTML = '👤'; fprev.style.background = 'var(--brown-pale)';
+  fprev._base64 = null;
+  // Populate parent dropdown
+  const sel = document.getElementById('hier-parent');
+  sel.innerHTML = '<option value="">— Raiz (sem pai) —</option>';
+  _hierData.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.name; opt.textContent = m.name + (m.level ? ` (${m.level})` : '');
+    sel.appendChild(opt);
+  });
+  modal.style.display = 'flex';
+  document.getElementById('hier-msg').textContent = '';
+}
+
+function editHierMembro(idx) {
+  const m = _hierData[idx];
+  if (!m) return;
+  openAddMembro();
+  document.getElementById('modal-hier-title').textContent = 'Editar Membro';
+  document.getElementById('hier-edit-id').value = idx;
+  document.getElementById('hier-nome').value    = m.name  || '';
+  document.getElementById('hier-nivel').value   = m.level || '';
+  document.getElementById('hier-funcao').value  = m.role  || '';
+  document.getElementById('hier-parent').value  = m.parentName || '';
+  if (m.photo) {
+    const fprev = document.getElementById('hier-foto-preview');
+    fprev.innerHTML = `<img src="${m.photo}" style="width:100%;height:100%;object-fit:cover;">`;
+    fprev._base64 = m.photo;
+  }
+}
+
+function previewHierFoto(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const fprev = document.getElementById('hier-foto-preview');
+    fprev.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+    fprev._base64 = e.target.result;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function saveHierMembro() {
+  const nome   = document.getElementById('hier-nome').value.trim();
+  const nivel  = document.getElementById('hier-nivel').value.trim();
+  const funcao = document.getElementById('hier-funcao').value.trim();
+  const parent = document.getElementById('hier-parent').value.trim();
+  const photo  = document.getElementById('hier-foto-preview')._base64 || null;
+  const msg    = document.getElementById('hier-msg');
+  if (!nome) { msg.textContent = '⚠ Nome obrigatório.'; msg.style.color='var(--error)'; return; }
+
+  const editIdx = document.getElementById('hier-edit-id').value;
+
+  if (editIdx !== '') {
+    // Edit existing node in DOM
+    const idx = parseInt(editIdx);
+    const m = _hierData[idx];
+    if (!m) return;
+    // Find node in DOM by matching name+level+role
+    let found = null;
+    document.querySelectorAll('.org-node').forEach(node => {
+      const n = (node.querySelector('.node-name')?.textContent || '').trim();
+      const l = (node.querySelector('.node-level')?.textContent || '').trim();
+      if (n === m.name && l === m.level) found = node;
+    });
+    if (found) {
+      const nameEl  = found.querySelector('.node-name');
+      const levelEl = found.querySelector('.node-level');
+      const roleEl  = found.querySelector('.node-role');
+      if (nameEl)  nameEl.textContent  = nome;
+      if (levelEl) levelEl.textContent = nivel;
+      if (roleEl)  roleEl.textContent  = funcao;
+      if (photo) {
+        const img = found.querySelector('.photo-circle img');
+        const ph  = found.querySelector('.photo-ph');
+        if (img) { img.src = photo; img.style.display = 'block'; }
+        if (ph)  ph.style.display = 'none';
+      }
+    }
+    scheduleChartSave();
+    updateCounters();
+  } else {
+    // Add new node to tree
+    let targetCol = null;
+    if (parent) {
+      document.querySelectorAll('.org-col').forEach(col => {
+        const n = (col.querySelector(':scope > .org-node .node-name')?.textContent || '').trim();
+        if (n === parent) targetCol = col;
+      });
+    }
+    const depth = targetCol
+      ? parseInt(targetCol.querySelector(':scope > .org-node')?.dataset.depth || '0') + 1
+      : 0;
+    const newCol = makeCol(depth, { name: nome, level: nivel, role: funcao, emoji: '👤' });
+    if (photo) {
+      const img = newCol.querySelector('.photo-circle img');
+      const ph  = newCol.querySelector('.photo-ph');
+      if (img) { img.src = photo; img.style.display = 'block'; }
+      if (ph)  ph.style.display = 'none';
+    }
+    if (targetCol) {
+      let ch = targetCol.querySelector(':scope > .org-children');
+      if (!ch) {
+        const vl = document.createElement('div'); vl.className = 'org-v-line'; targetCol.appendChild(vl);
+        ch = document.createElement('div'); ch.className = 'org-children'; targetCol.appendChild(ch);
+      }
+      ch.appendChild(newCol);
+      addToggle(targetCol);
+    } else {
+      document.getElementById('org-root').appendChild(newCol);
+    }
+    scheduleChartSave();
+    updateCounters();
+  }
+
+  document.getElementById('modal-hier').style.display = 'none';
+  loadHierarquia();
+}
+
+function exportHierXLSX() {
+  loadHierarquia(); // garante dados atualizados
+  const ws = XLSX.utils.json_to_sheet(_hierData.map(m => ({
+    Nome:      m.name     || '',
+    Nível:     m.level    || '',
+    Função:    m.role     || '',
+    'Reporta a': m.parentName || ''
+  })));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Hierarquia');
+  XLSX.writeFile(wb, 'hierarquia-bela-vista.xlsx');
+}
+
+function importHierXLSX(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const wb   = XLSX.read(e.target.result, { type: 'array' });
+    const ws   = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws);
+    rows.forEach(row => {
+      if (!row['Nome']) return;
+      const parentName = row['Reporta a'] || '';
+      let targetCol = null;
+      if (parentName) {
+        document.querySelectorAll('.org-col').forEach(col => {
+          const n = (col.querySelector(':scope > .org-node .node-name')?.textContent || '').trim();
+          if (n === parentName) targetCol = col;
+        });
+      }
+      const depth = targetCol
+        ? parseInt(targetCol.querySelector(':scope > .org-node')?.dataset.depth || '0') + 1
+        : 0;
+      const newCol = makeCol(depth, {
+        name:  row['Nome']   || '',
+        level: row['Nível']  || '',
+        role:  row['Função'] || '',
+        emoji: '👤'
+      });
+      if (targetCol) {
+        let ch = targetCol.querySelector(':scope > .org-children');
+        if (!ch) {
+          const vl = document.createElement('div'); vl.className = 'org-v-line'; targetCol.appendChild(vl);
+          ch = document.createElement('div'); ch.className = 'org-children'; targetCol.appendChild(ch);
+        }
+        ch.appendChild(newCol);
+        addToggle(targetCol);
+      } else {
+        document.getElementById('org-root').appendChild(newCol);
+      }
+    });
+    scheduleChartSave();
+    updateCounters();
+    loadHierarquia();
+  };
+  reader.readAsArrayBuffer(input.files[0]);
+  input.value = '';
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ABA UGROUPS
+// ══════════════════════════════════════════════════════════════════
+let _ugData = [];
+let _ugMap  = null;
+let _ugMarkers = [];
+let _ugEditFotoB64 = null;
+
+async function loadUGroups() {
+  const { data, error } = await sb.from('ugroups').select('*').order('created_at', { ascending: true });
+  _ugData = data || [];
+  renderUGList(_ugData);
+  if (!_ugMap) initUGMap();
+  else refreshUGMarkers();
+}
+
+function initUGMap() {
+  const mapEl = document.getElementById('ug-map');
+  if (!mapEl) return;
+  _ugMap = L.map('ug-map').setView([-23.5505, -46.6333], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(_ugMap);
+  refreshUGMarkers();
+}
+
+function refreshUGMarkers() {
+  if (!_ugMap) return;
+  _ugMarkers.forEach(m => m.remove());
+  _ugMarkers = [];
+  _ugData.forEach(ug => {
+    if (ug.lat && ug.lng) {
+      const icon = L.divIcon({
+        html: `<div style="background:var(--brown);color:#fff;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.2);">${ug.nome}</div>`,
+        className: '', iconAnchor: [0, 0]
+      });
+      const marker = L.marker([ug.lat, ug.lng], { icon })
+        .addTo(_ugMap)
+        .on('click', () => openUGroupDetail(ug.id));
+      _ugMarkers.push(marker);
+    }
+  });
+}
+
+function filterUGroups() {
+  const q = (document.getElementById('ug-search')?.value || '').toLowerCase();
+  const filtered = q ? _ugData.filter(u => (u.nome + ' ' + u.lider_nome + ' ' + u.endereco).toLowerCase().includes(q)) : _ugData;
+  renderUGList(filtered);
+}
+
+function renderUGList(list) {
+  const el = document.getElementById('ug-list');
+  if (!list.length) {
+    el.innerHTML = '<div style="padding:20px 16px;color:var(--gray);font-size:12px;">Nenhum uGroup cadastrado.</div>';
+    return;
+  }
+  el.innerHTML = list.map(ug => `
+    <div onclick="openUGroupDetail('${ug.id}')" style="padding:12px 16px;border-bottom:1px solid rgba(151,102,85,.08);cursor:pointer;transition:background .15s;" onmouseover="this.style.background='rgba(151,102,85,.05)'" onmouseout="this.style.background=''">
+      <div style="display:flex;align-items:center;gap:10px;">
+        ${ug.lider_foto ? `<img src="${ug.lider_foto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;">` : '<div style="width:36px;height:36px;border-radius:50%;background:var(--brown-pale);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">📍</div>'}
+        <div>
+          <div style="font-weight:700;font-size:13px;">${ug.nome}</div>
+          <div style="font-size:11px;color:var(--gray2);">${ug.lider_nome || 'Sem líder'} · ${ug.endereco || 'Sem endereço'}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openUGroupDetail(id) {
+  const ug = _ugData.find(u => u.id === id);
+  if (!ug) return;
+  const modal = document.getElementById('modal-ugroup');
+  document.getElementById('ug-modal-title').textContent = ug.nome;
+  let parts = [];
+  try { parts = JSON.parse(ug.participantes || '[]'); } catch(e) { parts = (ug.participantes || '').split('\n').filter(Boolean); }
+  const canEdit = currentProfile?.role === 'admin' || currentProfile?.can_edit;
+  document.getElementById('ug-modal-body').innerHTML = `
+    <div style="margin-bottom:16px;">
+      ${ug.lider_foto ? `<img src="${ug.lider_foto}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;float:left;margin-right:14px;">` : ''}
+      <div><strong>Líder:</strong> ${ug.lider_nome || '—'}</div>
+      <div><strong>Anfitrião:</strong> ${ug.anfitriao_nome || '—'}</div>
+      <div><strong>Endereço:</strong> ${ug.endereco || '—'}</div>
+      <div style="clear:both;"></div>
+    </div>
+    ${parts.length ? `<div style="margin-bottom:12px;"><strong>Participantes (${parts.length}):</strong><ul style="margin:6px 0 0 16px;font-size:12px;">${parts.map(p => `<li>${p}</li>`).join('')}</ul></div>` : ''}
+    ${canEdit ? `<div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn-submit" style="font-size:12px;" onclick="editUGroup('${ug.id}')">✏ Editar</button>
+      <button class="btn-outline danger" style="font-size:12px;color:var(--error);" onclick="deleteUGroup('${ug.id}')">× Excluir</button>
+    </div>` : ''}`;
+  modal.style.display = 'flex';
+  if (ug.lat && ug.lng && _ugMap) _ugMap.flyTo([ug.lat, ug.lng], 14);
+}
+
+function closeUGroupModal() {
+  document.getElementById('modal-ugroup').style.display = 'none';
+  document.getElementById('modal-ug-form').style.display = 'none';
+}
+
+function openAddUGroup() {
+  _ugEditFotoB64 = null;
+  document.getElementById('ug-form-title').textContent = 'Novo uGroup';
+  document.getElementById('ug-edit-id').value  = '';
+  document.getElementById('ug-nome').value     = '';
+  document.getElementById('ug-endereco').value = '';
+  document.getElementById('ug-lider').value    = '';
+  document.getElementById('ug-anf').value      = '';
+  document.getElementById('ug-participantes').value = '';
+  const fp = document.getElementById('ug-lider-foto-prev');
+  fp.innerHTML = '👤'; fp.style.background = 'var(--brown-pale)';
+  document.getElementById('modal-ug-form').style.display = 'flex';
+}
+
+function editUGroup(id) {
+  const ug = _ugData.find(u => u.id === id);
+  if (!ug) return;
+  _ugEditFotoB64 = ug.lider_foto || null;
+  document.getElementById('ug-form-title').textContent = 'Editar uGroup';
+  document.getElementById('ug-edit-id').value  = ug.id;
+  document.getElementById('ug-nome').value     = ug.nome || '';
+  document.getElementById('ug-endereco').value = ug.endereco || '';
+  document.getElementById('ug-lider').value    = ug.lider_nome || '';
+  document.getElementById('ug-anf').value      = ug.anfitriao_nome || '';
+  let partsText = '';
+  try { partsText = JSON.parse(ug.participantes || '[]').join('\n'); } catch(e) { partsText = ug.participantes || ''; }
+  document.getElementById('ug-participantes').value = partsText;
+  const fp = document.getElementById('ug-lider-foto-prev');
+  if (ug.lider_foto) {
+    fp.innerHTML = `<img src="${ug.lider_foto}" style="width:100%;height:100%;object-fit:cover;">`;
+  } else { fp.innerHTML = '👤'; }
+  document.getElementById('modal-ugroup').style.display = 'none';
+  document.getElementById('modal-ug-form').style.display = 'flex';
+}
+
+function previewUGFoto(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    _ugEditFotoB64 = e.target.result;
+    const fp = document.getElementById('ug-lider-foto-prev');
+    fp.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+async function saveUGroup() {
+  const nome     = document.getElementById('ug-nome').value.trim();
+  const endereco = document.getElementById('ug-endereco').value.trim();
+  const lider    = document.getElementById('ug-lider').value.trim();
+  const anf      = document.getElementById('ug-anf').value.trim();
+  const partsRaw = document.getElementById('ug-participantes').value;
+  const parts    = partsRaw.split('\n').map(s => s.trim()).filter(Boolean);
+  const editId   = document.getElementById('ug-edit-id').value;
+  if (!nome) { alert('Nome do uGroup é obrigatório.'); return; }
+
+  // Geocode address
+  let lat = null, lng = null;
+  if (endereco) {
+    try {
+      const geo = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco + ', São Paulo, SP, Brasil')}&limit=1`);
+      const geoData = await geo.json();
+      if (geoData[0]) { lat = parseFloat(geoData[0].lat); lng = parseFloat(geoData[0].lon); }
+    } catch(e) { console.warn('Geocoding failed', e); }
+  }
+
+  const payload = {
+    nome, endereco,
+    lider_nome: lider, anfitriao_nome: anf,
+    lider_foto: _ugEditFotoB64,
+    participantes: JSON.stringify(parts),
+    lat, lng,
+    created_by: currentUser?.id
+  };
+
+  let error;
+  if (editId) {
+    ({ error } = await sb.from('ugroups').update(payload).eq('id', editId));
+  } else {
+    ({ error } = await sb.from('ugroups').insert(payload));
+  }
+
+  if (error) { alert('Erro ao salvar: ' + error.message); return; }
+  document.getElementById('modal-ug-form').style.display = 'none';
+  await loadUGroups();
+}
+
+async function deleteUGroup(id) {
+  if (!confirm('Excluir este uGroup?')) return;
+  await sb.from('ugroups').delete().eq('id', id);
+  document.getElementById('modal-ugroup').style.display = 'none';
+  await loadUGroups();
+}
+
+function exportUGroupsXLSX() {
+  const ws = XLSX.utils.json_to_sheet(_ugData.map(u => ({
+    Nome: u.nome,
+    Endereço: u.endereco || '',
+    Líder: u.lider_nome || '',
+    Anfitrião: u.anfitriao_nome || '',
+    Participantes: u.participantes || '',
+    Latitude: u.lat || '',
+    Longitude: u.lng || ''
+  })));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'uGroups');
+  XLSX.writeFile(wb, 'ugroups-bela-vista.xlsx');
+}
+
+async function importUGroupsXLSX(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const wb = XLSX.read(e.target.result, { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws);
+    for (const row of rows) {
+      if (!row['Nome']) continue;
+      await sb.from('ugroups').insert({
+        nome: row['Nome'],
+        endereco: row['Endereço'] || '',
+        lider_nome: row['Líder'] || '',
+        anfitriao_nome: row['Anfitrião'] || '',
+        participantes: row['Participantes'] || '[]',
+        lat: row['Latitude'] || null,
+        lng: row['Longitude'] || null,
+        created_by: currentUser?.id
+      });
+    }
+    await loadUGroups();
+  };
+  reader.readAsArrayBuffer(input.files[0]);
+  input.value = '';
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ABA MEMBROS
+// ══════════════════════════════════════════════════════════════════
+let _membrosData = [];
+let _memFotoB64  = null;
+
+async function loadMembros() {
+  const { data } = await sb.from('membros').select('*, ugroups(nome)').order('created_at', { ascending: false });
+  _membrosData = data || [];
+  renderMembrosList();
+  // Populate ugroup dropdown
+  const sel = document.getElementById('mem-ugroup');
+  if (sel) {
+    const { data: ugs } = await sb.from('ugroups').select('id, nome').order('nome');
+    sel.innerHTML = '<option value="">Não</option>';
+    (ugs || []).forEach(u => {
+      const o = document.createElement('option');
+      o.value = u.id; o.textContent = u.nome;
+      sel.appendChild(o);
+    });
+  }
+}
+
+function renderMembrosList() {
+  const q = (document.getElementById('mem-search')?.value || '').toLowerCase();
+  const tbody = document.getElementById('membros-list');
+  const list = q
+    ? _membrosData.filter(m => (m.nome_completo + ' ' + m.telefone + ' ' + m.como_conheceu).toLowerCase().includes(q))
+    : _membrosData;
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="color:var(--gray);font-size:12px;padding:20px 16px;">Nenhum membro cadastrado.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(m => `
+    <tr>
+      <td>${m.foto ? `<img src="${m.foto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">` : '<span style="font-size:22px;">👤</span>'}</td>
+      <td style="font-weight:600;">${m.nome_completo || '—'}</td>
+      <td>${m.sexo === 'M' ? '♂ Masc.' : m.sexo === 'F' ? '♀ Fem.' : '—'}</td>
+      <td style="font-size:12px;">${m.telefone || '—'}</td>
+      <td style="font-size:12px;color:var(--gray2);">${m.como_conheceu || '—'}</td>
+      <td style="font-size:12px;">${m.ugroups?.nome || '—'}</td>
+      <td>
+        <button class="btn-outline" style="font-size:11px;padding:4px 10px;margin-right:4px;" onclick="openEditMembro('${m.id}')">✏</button>
+        <button class="btn-outline" style="font-size:11px;padding:4px 10px;color:var(--error);" onclick="deleteMembro('${m.id}')">×</button>
+      </td>
+    </tr>`).join('');
+}
+
+function openAddMembroForm() {
+  _memFotoB64 = null;
+  document.getElementById('mem-modal-title').textContent = 'Novo Membro';
+  document.getElementById('mem-edit-id').value  = '';
+  document.getElementById('mem-nome').value     = '';
+  document.getElementById('mem-sexo').value     = '';
+  document.getElementById('mem-nasc').value     = '';
+  document.getElementById('mem-tel').value      = '';
+  document.getElementById('mem-como').value     = '';
+  document.getElementById('mem-ugroup').value   = '';
+  document.getElementById('mem-como-outro').value = '';
+  document.getElementById('mem-como-outro-row').style.display = 'none';
+  const fp = document.getElementById('mem-foto-preview');
+  fp.innerHTML = '👤'; fp.style.background = 'var(--brown-pale)';
+  document.getElementById('mem-msg').textContent = '';
+  document.getElementById('modal-membro').style.display = 'flex';
+}
+
+function openEditMembro(id) {
+  const m = _membrosData.find(x => x.id === id);
+  if (!m) return;
+  _memFotoB64 = m.foto || null;
+  document.getElementById('mem-modal-title').textContent = 'Editar Membro';
+  document.getElementById('mem-edit-id').value  = m.id;
+  document.getElementById('mem-nome').value     = m.nome_completo || '';
+  document.getElementById('mem-sexo').value     = m.sexo || '';
+  document.getElementById('mem-nasc').value     = m.data_nascimento || '';
+  document.getElementById('mem-tel').value      = m.telefone || '';
+  document.getElementById('mem-como').value     = m.como_conheceu || '';
+  document.getElementById('mem-ugroup').value   = m.ugroup_id || '';
+  const fp = document.getElementById('mem-foto-preview');
+  if (m.foto) {
+    fp.innerHTML = `<img src="${m.foto}" style="width:100%;height:100%;object-fit:cover;">`;
+  } else { fp.innerHTML = '👤'; }
+  const isOutro = m.como_conheceu === 'Outro';
+  document.getElementById('mem-como-outro-row').style.display = isOutro ? '' : 'none';
+  document.getElementById('mem-msg').textContent = '';
+  document.getElementById('modal-membro').style.display = 'flex';
+}
+
+function previewMemFoto(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    _memFotoB64 = e.target.result;
+    const fp = document.getElementById('mem-foto-preview');
+    fp.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+// Show/hide "Outro" field
+document.addEventListener('change', e => {
+  if (e.target.id === 'mem-como') {
+    document.getElementById('mem-como-outro-row').style.display = e.target.value === 'Outro' ? '' : 'none';
+  }
+});
+
+async function saveMembroForm() {
+  const nome    = document.getElementById('mem-nome').value.trim();
+  const sexo    = document.getElementById('mem-sexo').value;
+  const nasc    = document.getElementById('mem-nasc').value;
+  const tel     = document.getElementById('mem-tel').value.trim();
+  const como    = document.getElementById('mem-como').value;
+  const comoOut = document.getElementById('mem-como-outro').value.trim();
+  const ugId    = document.getElementById('mem-ugroup').value || null;
+  const editId  = document.getElementById('mem-edit-id').value;
+  const msg     = document.getElementById('mem-msg');
+  if (!nome) { msg.textContent = '⚠ Nome obrigatório.'; msg.style.color = 'var(--error)'; return; }
+
+  const payload = {
+    foto: _memFotoB64,
+    nome_completo: nome,
+    sexo: sexo || null,
+    data_nascimento: nasc || null,
+    telefone: tel || null,
+    como_conheceu: como === 'Outro' ? (comoOut || 'Outro') : (como || null),
+    ugroup_id: ugId,
+    created_by: currentUser?.id
+  };
+
+  let error;
+  if (editId) {
+    ({ error } = await sb.from('membros').update(payload).eq('id', editId));
+  } else {
+    ({ error } = await sb.from('membros').insert(payload));
+  }
+
+  if (error) { msg.textContent = 'Erro: ' + error.message; msg.style.color = 'var(--error)'; return; }
+  document.getElementById('modal-membro').style.display = 'none';
+  await loadMembros();
+}
+
+async function deleteMembro(id) {
+  if (!confirm('Excluir este membro?')) return;
+  await sb.from('membros').delete().eq('id', id);
+  await loadMembros();
+}
+
+function exportMembrosXLSX() {
+  const ws = XLSX.utils.json_to_sheet(_membrosData.map(m => ({
+    Nome: m.nome_completo,
+    Sexo: m.sexo === 'M' ? 'Masculino' : m.sexo === 'F' ? 'Feminino' : '',
+    'Data Nasc.': m.data_nascimento || '',
+    Telefone: m.telefone || '',
+    'Como Conheceu': m.como_conheceu || '',
+    uGroup: m.ugroups?.nome || ''
+  })));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Membros');
+  XLSX.writeFile(wb, 'membros-bela-vista.xlsx');
+}
+
+async function importMembrosXLSX(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const wb = XLSX.read(e.target.result, { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws);
+    for (const row of rows) {
+      if (!row['Nome']) continue;
+      await sb.from('membros').insert({
+        nome_completo: row['Nome'],
+        sexo: row['Sexo']?.startsWith('M') ? 'M' : row['Sexo']?.startsWith('F') ? 'F' : null,
+        data_nascimento: row['Data Nasc.'] || null,
+        telefone: String(row['Telefone'] || ''),
+        como_conheceu: row['Como Conheceu'] || null,
+        created_by: currentUser?.id
+      });
+    }
+    await loadMembros();
+  };
+  reader.readAsArrayBuffer(input.files[0]);
+  input.value = '';
 }
 
 // ── KICK OFF ──
