@@ -650,8 +650,9 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
     <button class="modal-close" onclick="document.getElementById('modal-ug-form').style.display='none'">×</button>
     <h3 id="ug-form-title">Novo uGroup</h3>
     <input type="hidden" id="ug-edit-id">
-    <div class="form-group" style="margin-bottom:12px;"><label>Nome do uGroup</label><input class="login-field" id="ug-nome" style="margin:0;" placeholder="Ex: uGroup Itaquera"></div>
-    <div class="form-group" style="margin-bottom:12px;"><label>Endereço (bairro ou rua, São Paulo)</label><input class="login-field" id="ug-endereco" style="margin:0;" placeholder="Ex: Rua das Flores, 123 - Itaquera, SP"></div>
+    <div class="form-group" style="margin-bottom:12px;"><label>Nome do uGroup</label><input class="login-field" id="ug-nome" style="margin:0;" placeholder="Ex: uGroup Bela Vista"></div>
+    <div class="form-group" style="margin-bottom:12px;"><label>Dia e Horário</label><input class="login-field" id="ug-dia-horario" style="margin:0;" placeholder="Ex: Toda Quarta às 20h"></div>
+    <div class="form-group" style="margin-bottom:12px;"><label>Endereço (bairro ou rua, São Paulo)</label><input class="login-field" id="ug-endereco" style="margin:0;" placeholder="Ex: Rua Conselheiro ramalho - 624, SP"></div>
     <div class="form-row">
       <div class="form-group" style="margin-bottom:12px;"><label>Líder (nome)</label><input class="login-field" id="ug-lider" style="margin:0;" placeholder="Nome do líder"></div>
       <div class="form-group" style="margin-bottom:12px;"><label>Anfitrião (nome)</label><input class="login-field" id="ug-anf" style="margin:0;" placeholder="Nome do anfitrião"></div>
@@ -664,7 +665,7 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
     </div>
     <div class="form-group" style="margin-bottom:12px;">
       <label>Participantes (um por linha — Nome | Função)</label>
-      <textarea id="ug-participantes" style="width:100%;padding:9px 12px;border:1.5px solid rgba(151,102,85,.2);border-radius:9px;font-family:'Inter',sans-serif;font-size:12px;background:#FAF7F5;color:var(--text);resize:vertical;min-height:100px;outline:none;" placeholder="Wesley | Líder&#10;Larissa | Líder&#10;Tiago Brandão | Voluntário&#10;Gleusa | Membro&#10;Matilda | Participante"></textarea>
+      <textarea id="ug-participantes" style="width:100%;padding:9px 12px;border:1.5px solid rgba(151,102,85,.2);border-radius:9px;font-family:'Inter',sans-serif;font-size:12px;background:#FAF7F5;color:var(--text);resize:vertical;min-height:100px;outline:none;" placeholder="Vinicius Albuquerque | Pastor&#10;Antonio | Líder&#10;Matheus | Voluntário&#10;Gleusa | Membro&#10;Matilda | Participante"></textarea>
     </div>
     <div class="modal-actions">
       <button class="btn-submit" onclick="saveUGroup()">Salvar uGroup</button>
@@ -2287,8 +2288,7 @@ function openUGroupDetail(id) {
     <div style="margin-bottom:16px;">
       ${ug.lider_foto ? `<img src="${ug.lider_foto}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;float:left;margin-right:14px;">` : ''}
       <div><strong>Líder:</strong> ${ug.lider_nome || '—'}</div>
-      <div><strong>Anfitrião:</strong> ${ug.anfitriao_nome || '—'}</div>
-      <div><strong>Endereço:</strong> ${ug.endereco || '—'}</div>
+      <div><strong>Dia/Horário:</strong> ${ug.dia_horario || '—'}</div>
       <div style="clear:both;"></div>
     </div>
     ${parts.length ? `<div style="margin-bottom:12px;"><strong>Participantes (${parts.length}):</strong><ul style="margin:6px 0 0 16px;font-size:12px;">${parts.map(p => `<li>${p}</li>`).join('')}</ul></div>` : ''}
@@ -2313,6 +2313,7 @@ function openAddUGroup() {
   document.getElementById('ug-endereco').value = '';
   document.getElementById('ug-lider').value    = '';
   document.getElementById('ug-anf').value      = '';
+  document.getElementById('ug-dia-horario').value = '';
   document.getElementById('ug-participantes').value = '';
   const fp = document.getElementById('ug-lider-foto-prev');
   fp.innerHTML = '👤'; fp.style.background = 'var(--brown-pale)';
@@ -2329,6 +2330,7 @@ function editUGroup(id) {
   document.getElementById('ug-endereco').value = ug.endereco || '';
   document.getElementById('ug-lider').value    = ug.lider_nome || '';
   document.getElementById('ug-anf').value      = ug.anfitriao_nome || '';
+  document.getElementById('ug-dia-horario').value = ug.dia_horario || '';
   let partsText = '';
   try { partsText = JSON.parse(ug.participantes || '[]').join('\n'); } catch(e) { partsText = ug.participantes || ''; }
   document.getElementById('ug-participantes').value = partsText;
@@ -2374,6 +2376,7 @@ async function saveUGroup() {
   const payload = {
     nome, endereco,
     lider_nome: lider, anfitriao_nome: anf,
+    dia_horario: document.getElementById('ug-dia-horario').value.trim() || null,
     lider_foto: _ugEditFotoB64,
     participantes: JSON.stringify(parts),
     lat, lng,
