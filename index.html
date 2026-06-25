@@ -1861,6 +1861,18 @@ function initChart(savedData) {
   const root = document.getElementById('org-root');
   if (root.childElementCount > 0) {
     document.querySelectorAll('.org-col').forEach(addToggle);
+    document.querySelectorAll('.org-col').forEach(col => {
+    const node = col.querySelector(':scope > .org-node');
+    const depth = parseInt(node?.dataset.depth || '0');
+    if (depth >= 2) {
+      const ch = col.querySelector(':scope > .org-children');
+      const vl = col.querySelector(':scope > .org-v-line');
+      if (ch) { ch.style.display = 'none'; ch.dataset.collapsed = 'true'; }
+      if (vl) vl.style.display = 'none';
+      const btn = node?.querySelector('.toggle-btn');
+      if (btn) { btn.textContent = '▸'; btn.title = 'Mostrar filhos'; }
+    }
+  });
     toggleObserver.observe(root, {childList:true, subtree:true});
     updateCounters();
     initDragDrop();
@@ -1869,6 +1881,18 @@ function initChart(savedData) {
   }
   root.appendChild(buildTree(savedData || CHURCH, 0));
   document.querySelectorAll('.org-col').forEach(addToggle);
+  document.querySelectorAll('.org-col').forEach(col => {
+    const node = col.querySelector(':scope > .org-node');
+    const depth = parseInt(node?.dataset.depth || '0');
+    if (depth >= 2) {
+      const ch = col.querySelector(':scope > .org-children');
+      const vl = col.querySelector(':scope > .org-v-line');
+      if (ch) { ch.style.display = 'none'; ch.dataset.collapsed = 'true'; }
+      if (vl) vl.style.display = 'none';
+      const btn = node?.querySelector('.toggle-btn');
+      if (btn) { btn.textContent = '▸'; btn.title = 'Mostrar filhos'; }
+    }
+  });
   toggleObserver.observe(root, {childList:true, subtree:true});
   updateCounters();
   initDragDrop();
