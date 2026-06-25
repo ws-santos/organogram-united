@@ -1864,7 +1864,7 @@ function initChart(savedData) {
     document.querySelectorAll('.org-col').forEach(col => {
     const node = col.querySelector(':scope > .org-node');
     const depth = parseInt(node?.dataset.depth || '0');
-    if (depth >= 2) {
+    if (depth >= 1) {
       const ch = col.querySelector(':scope > .org-children');
       const vl = col.querySelector(':scope > .org-v-line');
       if (ch) { ch.style.display = 'none'; ch.dataset.collapsed = 'true'; }
@@ -1884,7 +1884,7 @@ function initChart(savedData) {
   document.querySelectorAll('.org-col').forEach(col => {
     const node = col.querySelector(':scope > .org-node');
     const depth = parseInt(node?.dataset.depth || '0');
-    if (depth >= 2) {
+    if (depth >= 1) {
       const ch = col.querySelector(':scope > .org-children');
       const vl = col.querySelector(':scope > .org-v-line');
       if (ch) { ch.style.display = 'none'; ch.dataset.collapsed = 'true'; }
