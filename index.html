@@ -499,7 +499,15 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
         </div>
       </div>
       <div class="report-card" style="padding:16px 20px;margin-bottom:16px;">
-        <input id="hier-search" class="login-field" type="text" placeholder="🔍 Buscar por nome, nível ou função..." oninput="renderHierList()" style="margin:0;max-width:360px;">
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+          <input id="hier-search" class="login-field" type="text" placeholder="🔍 Buscar por nome..." oninput="renderHierList()" style="margin:0;max-width:220px;">
+          <select id="hier-filter-nivel" class="login-field" onchange="renderHierList()" style="margin:0;max-width:160px;">
+            <option value="">Nível</option>
+          </select>
+          <select id="hier-filter-funcao" class="login-field" onchange="renderHierList()" style="margin:0;max-width:160px;">
+            <option value="">Função</option>
+          </select>
+        </div>
       </div>
       <div class="users-table-wrap">
         <table class="users-table">
@@ -542,11 +550,35 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
         </div>
       </div>
       <div class="report-card" style="padding:16px 20px;margin-bottom:16px;">
-        <input id="mem-search" class="login-field" type="text" placeholder="🔍 Buscar por nome, telefone..." oninput="renderMembrosList()" style="margin:0;max-width:360px;">
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+          <input id="mem-search" class="login-field" type="text" placeholder="🔍 Buscar por nome, telefone..." oninput="renderMembrosList()" style="margin:0;max-width:260px;">
+          <select id="mem-filter-sexo" class="login-field" onchange="renderMembrosList()" style="margin:0;max-width:130px;">
+            <option value="">Sexo</option>
+            <option value="M">Masculino</option>
+            <option value="F">Feminino</option>
+          </select>
+          <select id="mem-filter-como" class="login-field" onchange="renderMembrosList()" style="margin:0;max-width:160px;">
+            <option value="">Como Conheceu</option>
+            <option value="Redes Sociais">Redes Sociais</option>
+            <option value="Indicação">Indicação</option>
+            <option value="Mora no Bairro">Mora no Bairro</option>
+            <option value="Outro">Outro</option>
+          </select>
+          <select id="mem-filter-idade" class="login-field" onchange="renderMembrosList()" style="margin:0;max-width:140px;">
+            <option value="">Faixa etária</option>
+            <option value="0-17">Até 17 anos</option>
+            <option value="18-25">18 a 25 anos</option>
+            <option value="26-35">26 a 35 anos</option>
+            <option value="36-50">36 a 50 anos</option>
+            <option value="51-999">Acima de 50</option>
+          </select>
+          <select id="mem-filter-ugroup" class="login-field" onchange="renderMembrosList()" style="margin:0;max-width:160px;">
+            <option value="">uGroup</option>
+          </select>
       </div>
       <div class="users-table-wrap">
         <table class="users-table">
-          <thead><tr><th>Foto</th><th>Nome</th><th>Sexo</th><th>Telefone</th><th>Como Conheceu</th><th>uGroup</th><th>Ações</th></tr></thead>
+          <thead><tr><th>Foto</th><th>Nome</th><th>Sexo</th><th>Idade</th><th>Telefone</th><th>Como Conheceu</th><th>uGroup</th><th>Ações</th></tr></thead>
           <tbody id="membros-list"><tr><td colspan="7" style="color:var(--gray);font-size:12px;padding:20px 16px;">Carregando...</td></tr></tbody>
         </table>
       </div>
@@ -2023,11 +2055,29 @@ function loadHierarquia() {
 }
 
 function renderHierList() {
-  const q = (document.getElementById('hier-search')?.value || '').toLowerCase();
-  const tbody = document.getElementById('hier-list');
-  const list = q
-    ? _hierData.filter(m => [m.name, m.level, m.role].join(' ').toLowerCase().includes(q))
-    : _hierData;
+  const q       = (document.getElementById('hier-search')?.value || '').toLowerCase();
+  const fNivel  = document.getElementById('hier-filter-nivel')?.value  || '';
+  const fFuncao = document.getElementById('hier-filter-funcao')?.value || '';
+  const tbody   = document.getElementById('hier-list');
+  // Popular dropdowns dinamicamente
+  const nivelSel  = document.getElementById('hier-filter-nivel');
+  const funcaoSel = document.getElementById('hier-filter-funcao');
+  if (nivelSel && nivelSel.options.length <= 1) {
+    [...new Set(_hierData.map(m => m.level).filter(Boolean))].sort().forEach(v => {
+      const o = document.createElement('option'); o.value = v; o.textContent = v; nivelSel.appendChild(o);
+    });
+  }
+  if (funcaoSel && funcaoSel.options.length <= 1) {
+    [...new Set(_hierData.map(m => m.role).filter(Boolean))].sort().forEach(v => {
+      const o = document.createElement('option'); o.value = v; o.textContent = v; funcaoSel.appendChild(o);
+    });
+  }
+  const list = _hierData.filter(m => {
+    if (q && ![m.name, m.level, m.role].join(' ').toLowerCase().includes(q)) return false;
+    if (fNivel  && m.level !== fNivel)  return false;
+    if (fFuncao && m.role  !== fFuncao) return false;
+    return true;
+  });
   if (!list.length) {
     tbody.innerHTML = '<tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:20px 16px;">Nenhum membro encontrado.</td></tr>';
     return;
@@ -2488,17 +2538,38 @@ async function loadMembros() {
       o.value = u.id; o.textContent = u.nome;
       sel.appendChild(o);
     });
-  }
+  const fsel = document.getElementById('mem-filter-ugroup');
+    if (fsel) {
+      fsel.innerHTML = '<option value="">uGroup</option>';
+      (ugs || []).forEach(u => {
+        const o = document.createElement('option');
+        o.value = u.id; o.textContent = u.nome;
+        fsel.appendChild(o);
+      });
+    }
 }
 
 function renderMembrosList() {
-  const q = (document.getElementById('mem-search')?.value || '').toLowerCase();
-  const tbody = document.getElementById('membros-list');
-  const list = q
-    ? _membrosData.filter(m => (m.nome_completo + ' ' + m.telefone + ' ' + m.como_conheceu).toLowerCase().includes(q))
-    : _membrosData;
+  const q        = (document.getElementById('mem-search')?.value || '').toLowerCase();
+  const fSexo    = document.getElementById('mem-filter-sexo')?.value || '';
+  const fComo    = document.getElementById('mem-filter-como')?.value || '';
+  const fIdade   = document.getElementById('mem-filter-idade')?.value || '';
+  const fUgroup  = document.getElementById('mem-filter-ugroup')?.value || '';
+  const tbody    = document.getElementById('membros-list');
+  const list = _membrosData.filter(m => {
+    if (q && !(m.nome_completo + ' ' + m.telefone + ' ' + m.como_conheceu).toLowerCase().includes(q)) return false;
+    if (fSexo && m.sexo !== fSexo) return false;
+    if (fComo && m.como_conheceu !== fComo) return false;
+    if (fUgroup && m.ugroup_id !== fUgroup) return false;
+    if (fIdade && m.data_nascimento) {
+      const idade = new Date().getFullYear() - new Date(m.data_nascimento).getFullYear();
+      const [min, max] = fIdade.split('-').map(Number);
+      if (idade < min || idade > max) return false;
+    }
+    return true;
+  });
   if (!list.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="color:var(--gray);font-size:12px;padding:20px 16px;">Nenhum membro cadastrado.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="color:var(--gray);font-size:12px;padding:20px 16px;">Nenhum membro cadastrado.</td></tr>';
     return;
   }
   tbody.innerHTML = list.map(m => `
@@ -2506,6 +2577,7 @@ function renderMembrosList() {
       <td>${m.foto ? `<img src="${m.foto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">` : '<span style="font-size:22px;">👤</span>'}</td>
       <td style="font-weight:600;">${m.nome_completo || '—'}</td>
       <td>${m.sexo === 'M' ? '♂ Masc.' : m.sexo === 'F' ? '♀ Fem.' : '—'}</td>
+      <td style="font-size:12px;">${m.data_nascimento ? (new Date().getFullYear() - new Date(m.data_nascimento).getFullYear()) + ' anos' : '—'}</td>
       <td style="font-size:12px;">${m.telefone || '—'}</td>
       <td style="font-size:12px;color:var(--gray2);">${m.como_conheceu || '—'}</td>
       <td style="font-size:12px;">${m.ugroups?.nome || '—'}</td>
@@ -2633,20 +2705,35 @@ async function importMembrosXLSX(input) {
   if (!input.files || !input.files[0]) return;
   const reader = new FileReader();
   reader.onload = async e => {
-    const wb = XLSX.read(e.target.result, { type: 'array' });
+const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
     const ws = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(ws);
+    const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+    let ok = 0, erros = 0;
     for (const row of rows) {
       if (!row['Nome']) continue;
-      await sb.from('membros').insert({
+      let dataNasc = null;
+      if (row['Data Nasc.']) {
+        const d = row['Data Nasc.'];
+        if (d instanceof Date) {
+          dataNasc = d.toISOString().split('T')[0];
+        } else if (typeof d === 'string' && d.includes('/')) {
+          const [dia, mes, ano] = d.split('/');
+          dataNasc = `${ano}-${mes.padStart(2,'0')}-${dia.padStart(2,'0')}`;
+        } else if (typeof d === 'string') {
+          dataNasc = d;
+        }
+      }
+      const { error } = await sb.from('membros').insert({
         nome_completo: row['Nome'],
-        sexo: row['Sexo']?.startsWith('M') ? 'M' : row['Sexo']?.startsWith('F') ? 'F' : null,
-        data_nascimento: row['Data Nasc.'] || null,
+        sexo: String(row['Sexo'] || '').startsWith('M') ? 'M' : String(row['Sexo'] || '').startsWith('F') ? 'F' : null,
+        data_nascimento: dataNasc,
         telefone: String(row['Telefone'] || ''),
         como_conheceu: row['Como Conheceu'] || null,
         created_by: currentUser?.id
       });
+      if (error) erros++; else ok++;
     }
+    alert(`${ok} membro(s) importado(s)${erros ? `, ${erros} erro(s)` : ''}.`);
     await loadMembros();
   };
   reader.readAsArrayBuffer(input.files[0]);
