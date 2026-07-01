@@ -2546,9 +2546,9 @@ async function loadMembros() {
         o.value = u.id; o.textContent = u.nome;
         fsel.appendChild(o);
       });
-    }
+   }
+  }
 }
-
 function renderMembrosList() {
   const q        = (document.getElementById('mem-search')?.value || '').toLowerCase();
   const fSexo    = document.getElementById('mem-filter-sexo')?.value || '';
