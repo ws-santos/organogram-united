@@ -542,7 +542,10 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
   <div id="pane-membros" class="tab-pane">
     <div class="dash-pane">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px;">
-        <div><h2>Membros</h2><p class="dash-sub">Cadastro de membros da Igreja United Bela Vista</p></div>
+        <div>
+          <h2>Membros</h2>
+          <p class="dash-sub">Cadastro de membros da Igreja United Bela Vista &nbsp;·&nbsp; <span id="mem-total-count" style="font-weight:700;color:var(--brown);">0 cadastrados</span></p>
+        </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn-outline" style="font-size:11px;padding:7px 14px;" onclick="exportMembrosXLSX()">⬇ Exportar XLSX</button>
           <label class="btn-outline" style="font-size:11px;padding:7px 14px;cursor:pointer;">⬆ Importar<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importMembrosXLSX(this)"></label>
@@ -2568,6 +2571,8 @@ function renderMembrosList() {
     }
     return true;
   });
+  const totalEl = document.getElementById('mem-total-count');
+  if (totalEl) totalEl.textContent = `${_membrosData.length} cadastrado${_membrosData.length !== 1 ? 's' : ''}${list.length !== _membrosData.length ? ` · ${list.length} exibido${list.length !== 1 ? 's' : ''}` : ''}`;
   if (!list.length) {
     tbody.innerHTML = '<tr><td colspan="8" style="color:var(--gray);font-size:12px;padding:20px 16px;">Nenhum membro cadastrado.</td></tr>';
     return;
