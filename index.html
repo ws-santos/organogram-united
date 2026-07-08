@@ -555,6 +555,11 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
       <div class="report-card" style="padding:16px 20px;margin-bottom:16px;">
         <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
           <input id="mem-search" class="login-field" type="text" placeholder="🔍 Buscar por nome, telefone..." oninput="renderMembrosList()" style="margin:0;max-width:260px;">
+          <select id="mem-sort" class="login-field" onchange="renderMembrosList()" style="margin:0;max-width:150px;">
+            <option value="">Ordenar por...</option>
+            <option value="az">A → Z</option>
+            <option value="za">Z → A</option>
+          </select>
           <select id="mem-filter-sexo" class="login-field" onchange="renderMembrosList()" style="margin:0;max-width:130px;">
             <option value="">Sexo</option>
             <option value="M">Masculino</option>
@@ -2573,6 +2578,9 @@ function renderMembrosList() {
   });
   const totalEl = document.getElementById('mem-total-count');
   if (totalEl) totalEl.textContent = `${_membrosData.length} cadastrado${_membrosData.length !== 1 ? 's' : ''}${list.length !== _membrosData.length ? ` · ${list.length} exibido${list.length !== 1 ? 's' : ''}` : ''}`;
+  const sort = document.getElementById('mem-sort')?.value || '';
+  if (sort === 'az') list.sort((a, b) => (a.nome_completo || '').localeCompare(b.nome_completo || '', 'pt-BR'));
+  if (sort === 'za') list.sort((a, b) => (b.nome_completo || '').localeCompare(a.nome_completo || '', 'pt-BR'));
   if (!list.length) {
     tbody.innerHTML = '<tr><td colspan="8" style="color:var(--gray);font-size:12px;padding:20px 16px;">Nenhum membro cadastrado.</td></tr>';
     return;
