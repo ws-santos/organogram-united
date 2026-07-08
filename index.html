@@ -276,6 +276,45 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .org-col.dragging{opacity:.4;pointer-events:none;}
 .org-col.drag-over>.org-node{box-shadow:0 0 0 3px var(--brown) !important;background:var(--brown-pale) !important;}
 .org-col[data-depth="0"].drag-over>.org-node{box-shadow:0 0 0 3px #fff !important;}
+
+/* ── RESPONSIVO MOBILE ── */
+@media (max-width: 768px) {
+
+  /* NAV */
+  .top-nav { flex-wrap: wrap; gap: 6px; padding: 8px 10px; }
+  .nav-tabs { overflow-x: auto; flex-wrap: nowrap; gap: 0; }
+  .nav-tab  { font-size: 11px; padding: 6px 10px; white-space: nowrap; }
+  .nav-user { gap: 6px; }
+  .nav-user-name { display: none; }
+
+  /* ORGANOGRAMA */
+  .org-pane-header { padding: 16px 12px 0; }
+  .org-pane-header h1 { font-size: 20px; }
+  #org-root { padding: 16px 8px 80px; }
+  .counters-bar { gap: 6px; padding: 8px 10px; flex-wrap: wrap; }
+  .counter-chip { padding: 6px 10px; }
+
+  /* DASHBOARD */
+  .dash-pane { padding: 16px 12px 60px; }
+  .dash-grid { grid-template-columns: 1fr !important; }
+  .dash-card.wide { grid-column: span 1 !important; }
+  .form-row { flex-direction: column; gap: 8px; }
+
+  /* TABELAS (Hierarquia / Membros) */
+  .users-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .users-table { min-width: 600px; }
+
+  /* UGROUPS — empilha sidebar + mapa */
+  .ugroups-layout { flex-direction: column !important; }
+  .ugroups-sidebar { width: 100% !important; max-height: 320px; overflow-y: auto; }
+  #ug-map { min-height: 350px !important; width: 100% !important; }
+
+  /* MODAIS */
+  .modal-box { width: 95vw !important; margin: 10px; max-height: 88vh; }
+
+  /* FILTROS — quebra linha */
+  .dash-pane > div > div { flex-wrap: wrap; gap: 8px; }
+}
 </style>
 </head>
 <body>
