@@ -277,12 +277,18 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .org-col.drag-over>.org-node{box-shadow:0 0 0 3px var(--brown) !important;background:var(--brown-pale) !important;}
 .org-col[data-depth="0"].drag-over>.org-node{box-shadow:0 0 0 3px #fff !important;}
 
+  #mobile-menu-btn { display: none; background: none; border: 1px solid rgba(151,102,85,.3); border-radius: 8px; padding: 4px 10px; font-size: 20px; cursor: pointer; color: var(--brown); }
+#mobile-menu { display: none; position: fixed; top: 56px; left: 0; right: 0; background: #fff; border-bottom: 2px solid rgba(151,102,85,.15); z-index: 9999; flex-direction: column; padding: 8px 0; box-shadow: 0 6px 20px rgba(0,0,0,.12); }
+#mobile-menu .nav-tab { width: 100%; text-align: left; padding: 13px 20px; font-size: 14px; border-radius: 0; border-bottom: 1px solid rgba(151,102,85,.1); }
+  
 /* ── RESPONSIVO MOBILE ── */
 @media (max-width: 768px) {
 
   /* NAV */
   .top-nav { flex-wrap: wrap; gap: 6px; padding: 8px 10px; }
-  .nav-tabs { width: 100%; overflow-x: auto; flex-wrap: nowrap; gap: 0; -webkit-overflow-scrolling: touch; }
+  .nav-tabs { display: none; }
+  #mobile-menu-btn { display: flex !important; }
+  #mobile-menu.open { display: flex !important; }
   .nav-tab  { font-size: 11px; padding: 6px 10px; white-space: nowrap; }
   .nav-user { gap: 6px; }
   .nav-user-name { display: none; }
@@ -355,6 +361,16 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
       <button class="btn-logout" onclick="openProfile()">✏ Perfil</button>
       <button class="btn-logout" onclick="doLogout()">Sair</button>
     </div>
+    <button id="mobile-menu-btn" onclick="toggleMobileMenu()">⋮</button>
+<div id="mobile-menu">
+  <button class="nav-tab" onclick="showTab('dashboard',this);closeMobileMenu()">📊 Dashboard</button>
+  <button class="nav-tab" onclick="showTab('organograma',this);closeMobileMenu()">🏛 Organograma</button>
+  <button class="nav-tab" onclick="showTab('hierarquia',this);closeMobileMenu()">📋 Lista da Equipe</button>
+  <button class="nav-tab" onclick="showTab('ugroups',this);closeMobileMenu()">📍 uGroups</button>
+  <button class="nav-tab" onclick="showTab('membros',this);closeMobileMenu()">👤 Membros</button>
+  <button class="nav-tab" onclick="showTab('usuarios',this);closeMobileMenu()">👥 Usuários</button>
+  <button class="nav-tab" onclick="showTab('config',this);closeMobileMenu()">⚙️ Config</button>
+</div>
   </nav>
 
   <!-- TAB: ORGANOGRAMA -->
@@ -888,6 +904,15 @@ async function doLogout() {
   document.getElementById('login-email').value = '';
   document.getElementById('login-pass').value  = '';
   document.getElementById('login-error').textContent = '';
+}
+  
+  function toggleMobileMenu() {
+  document.getElementById('mobile-menu').classList.toggle('open');
+}
+
+  
+function closeMobileMenu() {
+  document.getElementById('mobile-menu').classList.remove('open');
 }
 
 // Login on Enter key
