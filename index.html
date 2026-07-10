@@ -745,6 +745,19 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
     <div id="ug-form-msg" class="form-success" style="margin-top:8px;"></div>
   </div>
 </div>
+<!-- MODAL RESET SENHA -->
+<div id="modal-reset-senha" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;align-items:center;justify-content:center;">
+  <div class="login-box" style="width:340px;">
+    <div class="logo-badge"><span>UBV</span></div>
+    <h2>Nova senha</h2>
+    <p>Digite e confirme sua nova senha</p>
+    <input type="password" id="reset-pw1" class="login-field" placeholder="Nova senha" style="margin-top:16px;">
+    <input type="password" id="reset-pw2" class="login-field" placeholder="Confirmar nova senha">
+    <button class="btn-login" onclick="salvarNovaSenha()">Salvar nova senha</button>
+    <div id="reset-msg" class="login-error"></div>
+  </div>
+</div>
+
 <!-- MODAL PERMISSÕES -->
 <div id="modal-perms" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;align-items:center;justify-content:center;">
   <div class="modal-box" style="width:400px;">
@@ -825,13 +838,15 @@ sb.auth.onAuthStateChange(async (event, session) => {
   if (event === 'SIGNED_OUT') {
     _appReady = false;
     showLoginScreen();
+  } else if (event === 'PASSWORD_RECOVERY') {
+    // Usuário veio do link de reset — mostra modal de nova senha
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('modal-reset-senha').style.display = 'flex';
   } else if (session && event === 'SIGNED_IN') {
-    // Login explícito do usuário — INITIAL_SESSION já é tratado pelo init()
     if (_appReady) return;
     _appReady = true;
     await onLogin(session.user);
   }
-  // TOKEN_REFRESHED / INITIAL_SESSION: tratados silenciosamente
 });
   async function forgotPassword() {
   const email = document.getElementById('login-email').value.trim();
@@ -2768,6 +2783,26 @@ function clearDashFilter() {
   document.getElementById('dash-filter-result').innerHTML = '';
 }
   
+// ── RESET SENHA ──
+async function salvarNovaSenha() {
+  const pw1 = document.getElementById('reset-pw1').value;
+  const pw2 = document.getElementById('reset-pw2').value;
+  const msg = document.getElementById('reset-msg');
+  if (!pw1 || pw1.length < 6) { msg.style.color='#e53935'; msg.textContent='Mínimo 6 caracteres.'; return; }
+  if (pw1 !== pw2) { msg.style.color='#e53935'; msg.textContent='As senhas não coincidem.'; return; }
+  const { error } = await sb.auth.updateUser({ password: pw1 });
+  if (error) { msg.style.color='#e53935'; msg.textContent='Erro: '+error.message; }
+  else {
+    msg.style.color='#388e3c'; msg.textContent='✅ Senha alterada! Redirecionando...';
+    setTimeout(async () => {
+      document.getElementById('modal-reset-senha').style.display = 'none';
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) { _appReady = true; await onLogin(session.user); }
+      else showLoginScreen();
+    }, 1500);
+  }
+}
+
 // ── USER PERMISSIONS & ACTIVE ──
 async function toggleActive(userId, currentlyActive) {
   if (currentlyActive && !confirm('Desativar este usuário? Ele não conseguirá mais logar.')) return;
