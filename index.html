@@ -418,6 +418,31 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
       </div>
 
       <!-- Add Report -->
+      <div class="report-card" style="padding:16px 20px;margin-bottom:16px;">
+  <h3 style="margin-bottom:12px;">🔍 Consultar por Data</h3>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
+    <div class="form-group" style="flex:0 0 150px">
+      <label>Data início</label>
+      <input type="date" id="dash-filter-de" class="login-field" style="margin:0;">
+    </div>
+    <div class="form-group" style="flex:0 0 150px">
+      <label>Data fim</label>
+      <input type="date" id="dash-filter-ate" class="login-field" style="margin:0;">
+    </div>
+    <div class="form-group" style="flex:0 0 140px">
+      <label>Tipo</label>
+      <select id="dash-filter-tipo" class="login-field" style="margin:0;">
+        <option value="">Todos</option>
+        <option value="culto">Culto</option>
+        <option value="midweek">Midweek</option>
+        <option value="oracao">Oração</option>
+      </select>
+    </div>
+    <button class="btn-submit" onclick="applyDashFilter()">Filtrar</button>
+    <button class="btn-outline" onclick="clearDashFilter()">Limpar</button>
+  </div>
+  <div id="dash-filter-result" style="margin-top:14px;"></div>
+</div>
       <div class="report-card">
         <h3>+ Adicionar Relatório de Culto</h3>
         <div class="form-row">
@@ -1271,7 +1296,13 @@ async function submitReport() {
     record.membros     = parseInt(document.getElementById('r-mem').value)     || 0;
     record.visitantes  = parseInt(document.getElementById('r-vis').value)     || 0;
   }
-  const { error } = await sb.from('cultos').insert(record);
+  const { data: existing } = await sb.from('cultos').select('id').eq('data', data).eq('tipo', tipo).maybeSingle();
+let error;
+if (existing) {
+  ({ error } = await sb.from('cultos').update(record).eq('id', existing.id));
+} else {
+  ({ error } = await sb.from('cultos').insert(record));
+}
   if (error) { msgEl.style.color = '#e53935'; msgEl.textContent = 'Erro ao salvar: ' + error.message; return; }
   msgEl.style.color = '#388e3c';
   msgEl.textContent = 'Relatório salvo!';
@@ -1281,6 +1312,7 @@ async function submitReport() {
 async function loadDashboard() {
   const { data } = await sb.from('cultos').select('*').order('data');
   if (!data) return;
+  _allCultosData = data;
 
   const cultos   = data.filter(d => d.tipo === 'culto');
   const midweeks = data.filter(d => d.tipo === 'midweek');
@@ -2817,6 +2849,53 @@ const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
   input.value = '';
 }
 
+let _allCultosData = [];
+
+async function applyDashFilter() {
+  const de   = document.getElementById('dash-filter-de').value;
+  const ate  = document.getElementById('dash-filter-ate').value;
+  const tipo = document.getElementById('dash-filter-tipo').value;
+  const el   = document.getElementById('dash-filter-result');
+
+  let filtered = _allCultosData;
+  if (de)   filtered = filtered.filter(r => r.data >= de);
+  if (ate)  filtered = filtered.filter(r => r.data <= ate);
+  if (tipo) filtered = filtered.filter(r => r.tipo === tipo);
+
+  if (!filtered.length) { el.innerHTML = '<p style="color:var(--gray);font-size:13px;">Nenhum registro encontrado.</p>'; return; }
+
+  function fmtDate(d) { const [y,m,day]=d.split('-'); return `${day}/${m}/${y}`; }
+
+  el.innerHTML = `
+    <div style="overflow-x:auto;">
+    <table class="users-table" style="min-width:500px;">
+      <thead><tr>
+        <th>Data</th><th>Tipo</th><th>Pastores</th><th>Líderes</th>
+        <th>Voluntários</th><th>Membros</th><th>Visitantes</th><th>Participantes</th>
+      </tr></thead>
+      <tbody>
+        ${filtered.map(r => `<tr>
+          <td>${fmtDate(r.data)}</td>
+          <td>${r.tipo}</td>
+          <td>${r.pastores ?? '—'}</td>
+          <td>${r.lideres ?? '—'}</td>
+          <td>${r.voluntarios ?? '—'}</td>
+          <td>${r.membros ?? '—'}</td>
+          <td>${r.visitantes ?? '—'}</td>
+          <td>${r.participantes ?? '—'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    </div>`;
+}
+
+function clearDashFilter() {
+  document.getElementById('dash-filter-de').value = '';
+  document.getElementById('dash-filter-ate').value = '';
+  document.getElementById('dash-filter-tipo').value = '';
+  document.getElementById('dash-filter-result').innerHTML = '';
+}
+  
 // ── KICK OFF ──
 document.addEventListener('DOMContentLoaded', init);
 </script>
