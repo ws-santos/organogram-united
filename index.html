@@ -14,7 +14,6 @@
 :root{--brown:#976655;--brown-d:#7A4F3F;--brown-l:#C4968A;--brown-pale:#F0EAE7;--bg:#F8F5F3;--text:#1A1A1A;--gray:#888;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
-
 /* ── LOGIN ── */
 #login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;}
 #login-screen.hidden{display:none;}
@@ -28,11 +27,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .btn-login{width:100%;padding:12px;background:var(--brown);color:#fff;border:none;border-radius:10px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s;margin-top:4px;}
 .btn-login:hover{background:var(--brown-d);}
 .login-error{color:#e53935;font-size:12px;margin-top:8px;min-height:18px;}
-
 /* ── APP LAYOUT ── */
 #app{display:none;flex-direction:column;min-height:100vh;}
 #app.visible{display:flex;}
-
 /* ── TOP NAV ── */
 .top-nav{background:#fff;border-bottom:1px solid rgba(151,102,85,.14);display:flex;align-items:center;padding:0 20px;height:56px;position:sticky;top:0;z-index:200;gap:0;}
 .nav-brand{display:flex;align-items:center;gap:10px;margin-right:24px;text-decoration:none;}
@@ -48,11 +45,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .nav-user-name{font-size:12px;font-weight:500;color:var(--text);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .btn-logout{background:transparent;border:1.5px solid rgba(151,102,85,.3);color:var(--brown);border-radius:8px;padding:5px 12px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;}
 .btn-logout:hover{background:var(--brown-pale);}
-
 /* ── TABS ── */
 .tab-pane{display:none;flex:1;}
 .tab-pane.active{display:block;}
-
 /* ── COUNTERS BAR ── */
 .counters-bar{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;padding:16px 20px 0;max-width:900px;margin:0 auto;}
 .counter-chip{background:#fff;border:1.5px solid rgba(151,102,85,.18);border-radius:50px;padding:8px 18px;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
@@ -60,7 +55,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .counter-chip .cc-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--gray);}
 .counter-total{background:var(--brown);border-color:var(--brown);}
 .counter-total .cc-num,.counter-total .cc-label{color:#fff;}
-
 /* ── ORGANOGRAM PANE ── */
 .org-pane-header{text-align:center;padding:32px 24px 20px;border-bottom:1px solid rgba(151,102,85,.1);}
 .org-pane-header h1{font-family:'Playfair Display',serif;font-size:clamp(18px,4vw,32px);color:var(--text);}
@@ -70,11 +64,9 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .scroll-inner{padding:0 40px;display:flex;flex-direction:column;align-items:center;min-width:max-content;}
 .scroll-hint{display:none;font-size:11px;color:var(--gray);text-align:center;padding:8px 16px 0;}
 @media(max-width:700px){.scroll-hint{display:block;}}
-
 /* ── CHART CANVAS ── */
 .chart-canvas{position:relative;display:inline-flex;flex-direction:column;align-items:center;}
 #overlay-layer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5;}
-
 /* ── ORG TREE ── */
 #org-root{display:flex;align-items:flex-start;gap:12px;position:relative;z-index:10;}
 .org-col{display:flex;flex-direction:column;align-items:center;position:relative;}
@@ -86,7 +78,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .org-children>.org-col::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:1.5px;height:20px;background:var(--brown-l);}
 .org-children{display:flex;align-items:flex-start;}
 .org-v-line{width:1.5px;height:20px;background:var(--brown-l);}
-
 /* ── NODE CARD ── */
 .org-node{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 10px 10px;border-radius:14px;transition:box-shadow .2s;}
 .org-node[data-depth="0"]{background:linear-gradient(135deg,var(--brown),var(--brown-d));color:#fff;box-shadow:0 8px 28px rgba(151,102,85,.32);width:164px;}
@@ -94,7 +85,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .org-node[data-depth="2"]{background:#FAF7F5;border:1.5px solid rgba(151,102,85,.15);width:122px;}
 .org-node[data-depth="3"]{background:var(--brown-pale);border:1px solid rgba(151,102,85,.13);width:112px;}
 .org-node[data-depth="4"],.org-node[data-depth="5"]{background:#ede7e3;border:1px solid rgba(151,102,85,.12);width:104px;}
-
 /* ── MENU ── */
 .node-menu{position:absolute;top:5px;right:5px;z-index:20;}
 .menu-trigger{background:transparent;border:none;cursor:pointer;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;line-height:1;transition:background .15s;opacity:0;-webkit-tap-highlight-color:transparent;}
@@ -112,7 +102,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .menu-drop .menu-sep{height:1px;background:rgba(255,255,255,.1);margin:3px 6px;}
 .mdot{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
 .mdot.g{background:#4CAF50;}.mdot.b{background:#2196F3;}.mdot.r{background:#e53935;}.mdot.o{background:#FF9800;}.mdot.p{background:#9C27B0;}.mdot.br{background:var(--brown);}
-
 /* ── NODE CONTENT ── */
 .node-level{font-size:8px;font-weight:600;letter-spacing:2px;text-transform:uppercase;text-align:center;}
 .org-node[data-depth="0"] .node-level{color:rgba(255,255,255,.6);}
@@ -134,7 +123,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 [contenteditable]:focus{background:rgba(151,102,85,.1);border-radius:3px;padding:1px 4px;}
 .org-node[data-depth="0"] [contenteditable]:focus{background:rgba(255,255,255,.18);}
 [contenteditable]:empty::before{content:attr(data-ph);opacity:.38;font-style:italic;}
-
 /* ── DEPT BOX ── */
 .dept-box{position:absolute;pointer-events:none;border-radius:14px;border:2px solid var(--brown);min-width:120px;min-height:60px;}
 .dept-box-header{pointer-events:all;cursor:move;display:flex;align-items:center;gap:6px;padding:6px 8px 0;user-select:none;-webkit-user-select:none;}
@@ -145,7 +133,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .dbox-btn{pointer-events:all;background:transparent;border:none;cursor:pointer;font-size:13px;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .15s;color:var(--brown);-webkit-tap-highlight-color:transparent;}
 .dbox-btn:hover{background:rgba(151,102,85,.12);}
 .dept-resize{pointer-events:all;position:absolute;bottom:0;right:0;width:18px;height:18px;cursor:se-resize;display:flex;align-items:center;justify-content:center;color:var(--brown-l);font-size:10px;border-radius:0 0 12px 0;}
-
 /* ── FORMAT BAR ── */
 #format-bar{position:fixed;display:none;align-items:center;gap:2px;background:#1e1e1e;border-radius:8px;padding:5px 6px;box-shadow:0 4px 20px rgba(0,0,0,.4);z-index:9999;white-space:nowrap;transform:translateX(-50%);touch-action:none;}
 #format-bar::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1e1e1e;}
@@ -154,21 +141,17 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .fbar-btn.active{background:rgba(255,255,255,.22);}
 .fbar-sep{width:1px;height:18px;background:rgba(255,255,255,.2);margin:0 2px;}
 .fbar-size{font-size:11px;font-weight:600;padding:0 4px;width:auto;}
-
 /* ── CHART ACTIONS ── */
 .chart-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:28px;}
 .btn-action{background:transparent;border:1.5px dashed var(--brown-l);color:var(--brown);border-radius:50px;padding:9px 20px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:background .2s,border-color .2s;-webkit-tap-highlight-color:transparent;}
 .btn-action:hover,.btn-action:active{background:var(--brown-pale);border-color:var(--brown);}
-
 /* ── TOOLBAR ── */
 .toolbar{position:fixed;bottom:20px;right:16px;z-index:100;}
 .btn-save{background:var(--brown);color:#fff;border:none;border-radius:50px;padding:13px 22px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 4px 18px rgba(151,102,85,.4);transition:background .2s;}
 .btn-save:active{background:var(--brown-d);}
-
 /* ── TOGGLE BTN (collapse children) ── */
 .toggle-btn{position:absolute;bottom:-13px;left:50%;transform:translateX(-50%);width:22px;height:22px;border-radius:50%;border:2px solid #C4968A;background:#F8F5F3;color:#976655;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:30;padding:0;line-height:1;box-shadow:0 1px 5px rgba(0,0,0,.15);transition:all .15s;}
 .toggle-btn:hover{background:#F0EAE7;border-color:#976655;transform:translateX(-50%) scale(1.12);}
-
 /* ── DASHBOARD PANE ── */
 .dash-pane{max-width:960px;margin:0 auto;padding:28px 20px 80px;}
 .dash-pane h2{font-family:'Playfair Display',serif;font-size:22px;color:var(--text);margin-bottom:4px;}
@@ -179,7 +162,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .dash-card h3{font-size:13px;font-weight:600;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
 .dash-card canvas{max-height:220px;}
 .dash-card.wide{grid-column:1/-1;}
-
 /* ── REPORT FORM ── */
 .report-card{background:#fff;border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:20px;}
 .report-card h3{font-size:14px;font-weight:600;color:var(--text);margin-bottom:16px;}
@@ -193,7 +175,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .form-success{color:#388e3c;font-size:12px;margin-top:8px;min-height:18px;}
 .tipo-fields{display:none;}
 .tipo-fields.active{display:flex;}
-
 /* ── USERS PANE ── */
 .users-pane{max-width:760px;margin:0 auto;padding:28px 20px 80px;}
 .users-pane h2{font-family:'Playfair Display',serif;font-size:22px;color:var(--text);margin-bottom:4px;}
@@ -207,7 +188,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .badge-user{background:#f0f0f0;color:#666;font-size:10px;font-weight:600;padding:2px 8px;border-radius:50px;}
 .create-user-card{background:#fff;border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.06);}
 .create-user-card h3{font-size:14px;font-weight:600;color:var(--text);margin-bottom:16px;}
-
 /* ── UGROUPS LAYOUT ── */
 .ugroups-layout{display:flex;height:calc(100vh - 56px);overflow:hidden;}
 .ugroups-sidebar{width:300px;flex-shrink:0;background:#fff;border-right:1px solid rgba(151,102,85,.12);display:flex;flex-direction:column;overflow:hidden;}
@@ -234,13 +214,11 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 /* Membros photo in table */
 .mem-photo-thumb{width:34px;height:34px;border-radius:50%;background:var(--brown-pale);border:2px solid rgba(151,102,85,.2);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:14px;}
 .mem-photo-thumb img{width:100%;height:100%;object-fit:cover;}
-
 /* ── DASH STATS ── */
 .dash-stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(151,102,85,.1);}
 .dash-stat{background:var(--brown-pale);border-radius:8px;padding:6px 12px;text-align:center;flex:1;min-width:90px;}
 .dash-stat .ds-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--gray);display:block;}
 .dash-stat .ds-val{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--brown);}
-
 /* ── TOGGLE SWITCH ── */
 .toggle-wrap{display:flex;align-items:center;gap:8px;}
 .toggle-switch{position:relative;width:36px;height:20px;flex-shrink:0;}
@@ -251,7 +229,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .toggle-switch input:checked+.toggle-slider::before{transform:translateX(16px);}
 .tbl-action-btn{background:transparent;border:1.5px solid rgba(151,102,85,.25);border-radius:6px;padding:3px 10px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:var(--brown);cursor:pointer;transition:all .15s;}
 .tbl-action-btn:hover{background:var(--brown-pale);}
-
 /* ── PROFILE MODAL ── */
 #modal-profile{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:8000;display:none;align-items:center;justify-content:center;}
 #modal-profile.open{display:flex;}
@@ -262,12 +239,10 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .modal-actions{display:flex;gap:10px;margin-top:16px;}
 .btn-outline{background:transparent;border:1.5px solid rgba(151,102,85,.3);color:var(--brown);border-radius:10px;padding:10px 18px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
 .btn-outline:hover{background:var(--brown-pale);}
-
 /* ── CHART TITLE EDITABLE ── */
 .chart-title-edit[contenteditable="true"]{border-radius:6px;padding:4px 8px;transition:background .15s,box-shadow .15s;cursor:text;}
 .chart-title-edit[contenteditable="true"]:hover{background:var(--brown-pale);}
 .chart-title-edit[contenteditable="true"]:focus{outline:none;background:var(--brown-pale);box-shadow:0 0 0 2px var(--brown-l);}
-
 /* ── DRAG & DROP ── */
 .drag-handle{position:absolute;top:5px;left:5px;width:18px;height:18px;cursor:grab;opacity:0;display:flex;align-items:center;justify-content:center;font-size:11px;border-radius:4px;transition:opacity .15s;z-index:15;color:rgba(255,255,255,.7);}
 .org-node:not([data-depth="0"]) .drag-handle{color:var(--gray);}
@@ -276,14 +251,12 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .org-col.dragging{opacity:.4;pointer-events:none;}
 .org-col.drag-over>.org-node{box-shadow:0 0 0 3px var(--brown) !important;background:var(--brown-pale) !important;}
 .org-col[data-depth="0"].drag-over>.org-node{box-shadow:0 0 0 3px #fff !important;}
-
   #mobile-menu-btn { display: none; background: none; border: 1px solid rgba(151,102,85,.3); border-radius: 8px; padding: 4px 10px; font-size: 20px; cursor: pointer; color: var(--brown); }
 #mobile-menu { display: none; position: fixed; top: 56px; left: 0; right: 0; background: #fff; border-bottom: 2px solid rgba(151,102,85,.15); z-index: 9999; flex-direction: column; padding: 8px 0; box-shadow: 0 6px 20px rgba(0,0,0,.12); }
 #mobile-menu .nav-tab { width: 100%; text-align: left; padding: 13px 20px; font-size: 14px; border-radius: 0; border-bottom: 1px solid rgba(151,102,85,.1); }
   
 /* ── RESPONSIVO MOBILE ── */
 @media (max-width: 768px) {
-
   /* NAV */
   .top-nav { flex-wrap: wrap; gap: 6px; padding: 8px 10px; }
   .nav-tabs { display: none; }
@@ -292,39 +265,32 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
   .nav-tab  { font-size: 11px; padding: 6px 10px; white-space: nowrap; }
   .nav-user { gap: 6px; }
   .nav-user-name { display: none; }
-
   /* ORGANOGRAMA */
   .org-pane-header { padding: 16px 12px 0; }
   .org-pane-header h1 { font-size: 20px; }
   #org-root { padding: 16px 8px 80px; }
   .counters-bar { gap: 6px; padding: 8px 10px; flex-wrap: wrap; }
   .counter-chip { padding: 6px 10px; }
-
   /* DASHBOARD */
   .dash-pane { padding: 16px 12px 60px; }
   .dash-grid { grid-template-columns: 1fr !important; }
   .dash-card.wide { grid-column: span 1 !important; }
   .form-row { flex-direction: column; gap: 8px; }
-
   /* TABELAS (Hierarquia / Membros) */
   .users-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .users-table { min-width: 600px; }
-
   /* UGROUPS — empilha sidebar + mapa */
   .ugroups-layout { flex-direction: column !important; }
   .ugroups-sidebar { width: 100% !important; max-height: 320px; overflow-y: auto; }
   #ug-map { min-height: 350px !important; width: 100% !important; }
-
   /* MODAIS */
   .modal-box { width: 95vw !important; margin: 10px; max-height: 88vh; }
-
   /* FILTROS — quebra linha */
   .dash-pane > div > div { flex-wrap: wrap; gap: 8px; }
 }
 </style>
 </head>
 <body>
-
 <!-- LOGIN SCREEN -->
 <div id="login-screen">
   <div class="login-box">
@@ -334,13 +300,12 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
     <input id="login-email" class="login-field" type="email" placeholder="Email" autocomplete="email">
     <input id="login-pass" class="login-field" type="password" placeholder="Senha" autocomplete="current-password">
     <button class="btn-login" onclick="doLogin()">Entrar</button>
+    <button type="button" onclick="forgotPassword()" style="background:none;border:none;color:var(--brown);font-size:11px;cursor:pointer;margin-top:6px;text-decoration:underline;">Esqueci minha senha</button>
     <div id="login-error" class="login-error"></div>
   </div>
 </div>
-
 <!-- MAIN APP -->
 <div id="app">
-
   <!-- TOP NAV -->
   <nav class="top-nav">
     <div class="nav-brand">
@@ -372,7 +337,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
   <button class="nav-tab" onclick="showTab('config',this);closeMobileMenu()">⚙️ Config</button>
 </div>
   </nav>
-
   <!-- TAB: ORGANOGRAMA -->
   <div id="pane-organograma" class="tab-pane active">
     <div class="org-pane-header">
@@ -402,7 +366,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
       </div>
     </main>
   </div>
-
   <!-- TAB: DASHBOARD -->
   <div id="pane-dashboard" class="tab-pane">
     <div class="dash-pane">
@@ -416,7 +379,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
           <label class="btn-outline" style="font-size:11px;padding:7px 14px;cursor:pointer;">⬆ Importar<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importDashXLSX(this)"></label>
         </div>
       </div>
-
       <!-- Add Report -->
       <div class="report-card" style="padding:16px 20px;margin-bottom:16px;">
   <h3 style="margin-bottom:12px;">🔍 Consultar por Data</h3>
@@ -475,7 +437,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
         <button class="btn-submit" onclick="submitReport()">Salvar Relatório</button>
         <div id="report-msg" class="form-success"></div>
       </div>
-
       <!-- Charts -->
       <div class="dash-grid">
         <div class="dash-card wide">
@@ -501,7 +462,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
       </div>
     </div>
   </div>
-
   <!-- TAB: USUÁRIOS (admin) -->
   <div id="pane-usuarios" class="tab-pane">
     <div class="users-pane">
@@ -531,7 +491,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
       </div>
     </div>
   </div>
-
   <!-- TAB: CONFIGURAÇÕES (admin) -->
   <div id="pane-config" class="tab-pane">
     <div class="users-pane">
@@ -566,7 +525,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
       </div>
     </div>
   </div>
-
   <!-- TAB: HIERARQUIA -->
   <div id="pane-hierarquia" class="tab-pane">
     <div class="dash-pane">
@@ -597,7 +555,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
       </div>
     </div>
   </div>
-
   <!-- TAB: UGROUPS -->
   <div id="pane-ugroups" class="tab-pane">
     <div class="ugroups-layout">
@@ -617,7 +574,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
       <div id="ug-map" style="flex:1;min-height:500px;"></div>
     </div>
   </div>
-
   <!-- TAB: MEMBROS -->
   <div id="pane-membros" class="tab-pane">
     <div class="dash-pane">
@@ -672,9 +628,7 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
       </div>
     </div>
   </div>
-
 </div><!-- #app -->
-
 <!-- MODAL: ADICIONAR À HIERARQUIA -->
 <div id="modal-hier" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:8000;align-items:center;justify-content:center;">
   <div class="modal-box" style="width:420px;max-height:90vh;overflow-y:auto;">
@@ -701,7 +655,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
     <div id="hier-msg" class="form-success" style="margin-top:8px;"></div>
   </div>
 </div>
-
 <!-- MODAL: UGROUP DETALHES / EDITAR -->
 <div id="modal-ugroup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:8000;align-items:center;justify-content:center;">
   <div class="modal-box" style="width:500px;max-height:90vh;overflow-y:auto;">
@@ -710,7 +663,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
     <div id="ug-modal-body"></div>
   </div>
 </div>
-
 <!-- MODAL: MEMBRO DETALHES / EDITAR -->
 <div id="modal-membro" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:8000;align-items:center;justify-content:center;">
   <div class="modal-box" style="width:460px;max-height:90vh;overflow-y:auto;">
@@ -763,7 +715,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
     <div id="mem-msg" class="form-success" style="margin-top:8px;"></div>
   </div>
 </div>
-
 <!-- MODAL: ADICIONAR UGROUP FORM -->
 <div id="modal-ug-form" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:8001;align-items:center;justify-content:center;">
   <div class="modal-box" style="width:480px;max-height:90vh;overflow-y:auto;">
@@ -794,6 +745,29 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
     <div id="ug-form-msg" class="form-success" style="margin-top:8px;"></div>
   </div>
 </div>
+<!-- MODAL PERMISSÕES -->
+<div id="modal-perms" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;align-items:center;justify-content:center;">
+  <div class="modal-box" style="width:400px;">
+    <button class="modal-close" onclick="document.getElementById('modal-perms').style.display='none'">×</button>
+    <h3 id="perms-modal-title">Permissões</h3>
+    <input type="hidden" id="perms-user-id">
+    <p style="font-size:11px;color:var(--gray);margin-bottom:16px;">Defina o que este usuário pode ver e fazer.</p>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <label class="toggle-wrap"><span class="toggle-switch"><input type="checkbox" id="perm-dashboard"><span class="toggle-slider"></span></span><span style="font-size:13px;">Ver Dashboard</span></label>
+      <label class="toggle-wrap"><span class="toggle-switch"><input type="checkbox" id="perm-add-culto"><span class="toggle-slider"></span></span><span style="font-size:13px;">Inserir dados de culto</span></label>
+      <label class="toggle-wrap"><span class="toggle-switch"><input type="checkbox" id="perm-organograma"><span class="toggle-slider"></span></span><span style="font-size:13px;">Ver Organograma</span></label>
+      <label class="toggle-wrap"><span class="toggle-switch"><input type="checkbox" id="perm-edit-org"><span class="toggle-slider"></span></span><span style="font-size:13px;">Editar Organograma</span></label>
+      <label class="toggle-wrap"><span class="toggle-switch"><input type="checkbox" id="perm-hierarquia"><span class="toggle-slider"></span></span><span style="font-size:13px;">Ver Lista da Equipe</span></label>
+      <label class="toggle-wrap"><span class="toggle-switch"><input type="checkbox" id="perm-ugroups"><span class="toggle-slider"></span></span><span style="font-size:13px;">Ver uGroups</span></label>
+      <label class="toggle-wrap"><span class="toggle-switch"><input type="checkbox" id="perm-membros"><span class="toggle-slider"></span></span><span style="font-size:13px;">Ver Membros</span></label>
+    </div>
+    <div class="modal-actions" style="margin-top:20px;">
+      <button class="btn-submit" onclick="savePerms()">Salvar</button>
+      <button class="btn-outline" onclick="document.getElementById('modal-perms').style.display='none'">Cancelar</button>
+    </div>
+    <div id="perms-msg" class="form-success"></div>
+  </div>
+</div>
 
 <!-- FORMAT BAR -->
 <div id="format-bar">
@@ -805,12 +779,10 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
   <button class="fbar-btn fbar-size" onmousedown="applySize(event,'1.28em')" ontouchstart="applySize(event,'1.28em')">G</button>
   <button class="fbar-btn fbar-size" onmousedown="applySize(event,'1.6em')" ontouchstart="applySize(event,'1.6em')">GG</button>
 </div>
-
 <!-- TOOLBAR -->
 <div class="toolbar" id="main-toolbar">
   <button class="btn-save" onclick="saveFile()">⬇ Baixar</button>
 </div>
-
 <!-- PROFILE MODAL -->
 <div id="modal-profile">
   <div class="modal-box">
@@ -826,7 +798,6 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
     <div id="profile-msg" class="form-success"></div>
   </div>
 </div>
-
 <script>
 // ═══════════════════════════════════════════════════════════
 // SUPABASE
@@ -834,13 +805,10 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 const SUPA_URL = 'https://fgciggqurvkrrdywsbzy.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnY2lnZ3F1cnZrcnJkeXdzYnp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4ODY0NjUsImV4cCI6MjA5NzQ2MjQ2NX0.0T-H3D8bSKORGC-P9HMEmD35vJi6BSE0Es0zCpCTn5k';
 const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-
 let currentUser = null;
 let currentProfile = null;
-
 // ── AUTH ──
 let _appReady = false;
-
 async function init() {
   // Restaura sessão salva no localStorage (funciona no F5 sem precisar de evento)
   try {
@@ -853,7 +821,6 @@ async function init() {
     console.error('Erro ao restaurar sessão:', e);
   }
 }
-
 sb.auth.onAuthStateChange(async (event, session) => {
   if (event === 'SIGNED_OUT') {
     _appReady = false;
@@ -866,12 +833,18 @@ sb.auth.onAuthStateChange(async (event, session) => {
   }
   // TOKEN_REFRESHED / INITIAL_SESSION: tratados silenciosamente
 });
-
+  async function forgotPassword() {
+  const email = document.getElementById('login-email').value.trim();
+  const el = document.getElementById('login-error');
+  if (!email) { el.style.color='#e53935'; el.textContent = 'Digite seu email primeiro.'; return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+  if (error) { el.style.color='#e53935'; el.textContent = 'Erro: ' + error.message; }
+  else { el.style.color='#388e3c'; el.textContent = '✅ Link enviado para ' + email; }
+}
 async function onLogin(user) {
   try {
     currentUser = user;
     const { data, error: profileErr } = await sb.from('profiles').select('*').eq('id', user.id).single();
-
     // Se o token for inválido/expirado, limpar sessão e mostrar tela de login
     if (profileErr && (profileErr.code === 'PGRST301' || (profileErr.message || '').toLowerCase().includes('jwt') || (profileErr.message || '').toLowerCase().includes('invalid'))) {
       _appReady = false;
@@ -880,8 +853,16 @@ async function onLogin(user) {
       document.getElementById('login-error').textContent = 'Sessão expirada. Faça login novamente.';
       return;
     }
-
     currentProfile = data;
+
+    if (data?.active === false) {
+      _appReady = false;
+      await sb.auth.signOut();
+      showLoginScreen();
+      document.getElementById('login-error').textContent = 'Usuário desativado. Contate o administrador.';
+      return;
+    }
+
     document.getElementById('login-screen').classList.add('hidden');
     document.getElementById('app').style.display = 'flex';
     document.getElementById('nav-user-name').textContent = data?.name || user.email;
@@ -892,6 +873,27 @@ async function onLogin(user) {
     }
     const savedChart = await loadSettings(isAdmin);
     applyPermissions(isAdmin || data?.can_edit);
+
+    if (!isAdmin) {
+      const p = data?.perms || {};
+      const tabMap = { dashboard:'dashboard', organograma:'organograma', hierarquia:'hierarquia', ugroups:'ugroups', membros:'membros' };
+      Object.entries(tabMap).forEach(([key, pane]) => {
+        if (p[key] === false) {
+          document.querySelectorAll('.nav-tab').forEach(btn => {
+            if (btn.getAttribute('onclick')?.includes(`'${pane}'`)) btn.style.display = 'none';
+          });
+          document.querySelectorAll('#mobile-menu .nav-tab').forEach(btn => {
+            if (btn.getAttribute('onclick')?.includes(`'${pane}'`)) btn.style.display = 'none';
+          });
+        }
+      });
+      if (p.edit_org === false) applyPermissions(false);
+      if (p.add_culto === false) {
+        const addCultoCard = document.querySelector('#pane-dashboard .report-card:last-of-type');
+        if (addCultoCard) addCultoCard.style.display = 'none';
+      }
+    }
+
     initChart(savedChart);
     loadDashboard();
     if (isAdmin) loadUsers();
@@ -904,14 +906,12 @@ async function onLogin(user) {
     showLoginScreen();
   }
 }
-
 function showLoginScreen() {
   currentUser = null;
   currentProfile = null;
   document.getElementById('login-screen').classList.remove('hidden');
   document.getElementById('app').style.display = 'none';
 }
-
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass  = document.getElementById('login-pass').value;
@@ -922,7 +922,6 @@ async function doLogin() {
   if (error) { errEl.textContent = 'Email ou senha incorretos.'; }
   else { errEl.textContent = ''; }
 }
-
 async function doLogout() {
   await sb.auth.signOut();
   // Limpa campos do formulário de login para novo acesso limpo
@@ -934,17 +933,14 @@ async function doLogout() {
   function toggleMobileMenu() {
   document.getElementById('mobile-menu').classList.toggle('open');
 }
-
   
 function closeMobileMenu() {
   document.getElementById('mobile-menu').classList.remove('open');
 }
-
 // Login on Enter key
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !document.getElementById('login-screen').classList.contains('hidden')) doLogin();
 });
-
 async function exportDashXLSX() {
   const { data } = await sb.from('cultos').select('*').order('data');
   if (!data || !data.length) { alert('Nenhum relatório para exportar.'); return; }
@@ -962,7 +958,6 @@ async function exportDashXLSX() {
   XLSX.utils.book_append_sheet(wb, ws, 'Cultos');
   XLSX.writeFile(wb, 'dashboard-bela-vista.xlsx');
 }
-
 async function importDashXLSX(input) {
   if (!input.files || !input.files[0]) return;
   const reader = new FileReader();
@@ -992,15 +987,12 @@ async function importDashXLSX(input) {
   reader.readAsArrayBuffer(input.files[0]);
   input.value = '';
 }
-
-
 // ── SETTINGS ──
 async function loadSettings(isAdmin) {
   const { data } = await sb.from('settings').select('*');
   if (!data) return;
   const map = {};
   data.forEach(r => map[r.key] = r.value);
-
   // Apply church name
   const name = map['church-name'] || 'Igreja United Bela Vista';
   const badge = map['badge'] || 'untd.';
@@ -1011,7 +1003,6 @@ async function loadSettings(isAdmin) {
   const subEl = document.getElementById('church-subtitle');
   if (subEl) subEl.textContent = subtitle;
   document.title = name + ' — Sistema de Equipes';
-
   // Pre-fill config form
   const cfg1 = document.getElementById('cfg-church-name');
   const cfg2 = document.getElementById('cfg-badge');
@@ -1021,17 +1012,14 @@ async function loadSettings(isAdmin) {
   if (cfg3) cfg3.value = subtitle;
   // Pre-fill logo preview in settings
   updateLogoPreview(logo, badge);
-
   // Apply chart titles
   ['cultos','visitantes','oracao','midweek'].forEach(k => {
     const el = document.getElementById('title-' + k);
     if (el && map['title-' + k]) el.textContent = map['title-' + k];
   });
-
   // Load saved chart data
   const chartDataRaw = map['chart-data'];
   const chartData = chartDataRaw ? (()=>{ try { return JSON.parse(chartDataRaw); } catch(e){ return null; } })() : null;
-
   // Make chart titles editable if admin
   if (isAdmin) {
     ['cultos','visitantes','oracao','midweek'].forEach(k => {
@@ -1045,7 +1033,6 @@ async function loadSettings(isAdmin) {
   }
   return chartData;
 }
-
 async function saveSettings() {
   const name     = document.getElementById('cfg-church-name').value.trim();
   const badge    = document.getElementById('cfg-badge').value.trim();
@@ -1071,11 +1058,9 @@ async function saveSettings() {
   msgEl.textContent = 'Configurações salvas!';
   setTimeout(() => msgEl.textContent = '', 2000);
 }
-
 async function saveSetting(key, value) {
   await sb.from('settings').upsert({ key, value }, { onConflict: 'key' });
 }
-
 // ── LOGO ──
 function applyLogo(base64, badge) {
   document.querySelectorAll('.nav-badge').forEach(el => {
@@ -1106,7 +1091,6 @@ function applyLogo(base64, badge) {
     }
   }
 }
-
 function updateLogoPreview(base64, badge) {
   const previewText = document.getElementById('cfg-logo-text');
   const previewImg  = document.getElementById('cfg-logo-img');
@@ -1121,7 +1105,6 @@ function updateLogoPreview(base64, badge) {
     previewText.textContent = badge || 'untd.';
   }
 }
-
 function uploadLogo() {
   const input = document.createElement('input');
   input.type = 'file';
@@ -1142,7 +1125,6 @@ function uploadLogo() {
   };
   input.click();
 }
-
 // ── PERMISSIONS ──
 function applyPermissions(canEdit) {
   const editMode = !!canEdit;
@@ -1160,7 +1142,6 @@ function applyPermissions(canEdit) {
   document.querySelectorAll('.chart-actions').forEach(el => el.style.display = editMode ? '' : 'none');
   document.querySelectorAll('.toggle-btn').forEach(el => el.style.display = ''); // always show collapse toggle
 }
-
 // ── TABS ──
 function showTab(id, btn) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
@@ -1176,7 +1157,6 @@ function showTab(id, btn) {
   if (id === 'ugroups')     loadUGroups();
   if (id === 'membros')     loadMembros();
 }
-
 // ── PROFILE MODAL ──
 function openProfile() {
   if (!currentProfile) return;
@@ -1207,7 +1187,6 @@ async function saveProfile() {
   msgEl.textContent = 'Perfil atualizado com sucesso!';
   setTimeout(closeProfile, 1500);
 }
-
 // ── USERS MANAGEMENT ──
 async function loadUsers() {
   if (currentProfile?.role !== 'admin') return;
@@ -1216,8 +1195,8 @@ async function loadUsers() {
   const tbody = document.getElementById('users-list');
   if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:20px 16px;">Nenhum usuário.</td></tr>'; return; }
   tbody.innerHTML = data.map(u => `
-    <tr>
-      <td>${u.name || '—'}</td>
+    <tr style="${u.active === false ? 'opacity:0.5;' : ''}">
+      <td>${u.name || '—'}${u.active === false ? ' <span style="font-size:10px;color:#e53935;">(desativado)</span>' : ''}</td>
       <td style="color:var(--gray);font-size:12px;">${u.cargo || '—'}</td>
       <td><span class="${u.role === 'admin' ? 'badge-admin' : 'badge-user'}">${u.role === 'admin' ? 'Admin' : 'Usuário'}</span></td>
       <td>
@@ -1227,24 +1206,25 @@ async function loadUsers() {
           <span class="toggle-slider"></span>
         </label>
       </td>
-      <td>
-        <button class="tbl-action-btn" onclick="toggleRole('${u.id}','${u.role}')">
+      <td style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="tbl-action-btn" onclick="toggleRole('${u.id}','${u.role || 'user'}')">
           ${u.role === 'admin' ? '→ Usuário' : '→ Admin'}
         </button>
+        ${u.role !== 'admin' ? `
+        <button class="tbl-action-btn" onclick="openPerms('${u.id}','${(u.name||'').replace(/'/g,"\\'")}')">🔐 Permissões</button>
+        <button class="tbl-action-btn" style="color:${u.active===false?'#388e3c':'#e53935'};border-color:${u.active===false?'#388e3c':'#e53935'};" onclick="toggleActive('${u.id}',${u.active!==false})">${u.active===false?'✅ Reativar':'🚫 Desativar'}</button>
+        ` : ''}
       </td>
     </tr>`).join('');
 }
-
 async function toggleCanEdit(userId, value) {
   await sb.from('profiles').update({ can_edit: value }).eq('id', userId);
 }
-
 async function toggleRole(userId, currentRole) {
   const newRole = currentRole === 'admin' ? 'user' : 'admin';
   await sb.from('profiles').update({ role: newRole }).eq('id', userId);
   loadUsers();
 }
-
 async function createUser() {
   const name  = document.getElementById('nu-name').value.trim();
   const cargo = document.getElementById('nu-cargo').value.trim();
@@ -1267,18 +1247,15 @@ async function createUser() {
   document.getElementById('nu-pass').value = '';
   setTimeout(() => { msgEl.textContent = ''; loadUsers(); }, 1500);
 }
-
 // ═══════════════════════════════════════════════════════════
 // DASHBOARD / CHARTS
 // ═══════════════════════════════════════════════════════════
 let charts = {};
-
 function onTipoChange() {
   const tipo = document.getElementById('r-tipo').value;
   document.getElementById('fields-normal').classList.toggle('active', tipo !== 'oracao');
   document.getElementById('fields-oracao').classList.toggle('active', tipo === 'oracao');
 }
-
 async function submitReport() {
   const data  = document.getElementById('r-data').value;
   const tipo  = document.getElementById('r-tipo').value;
@@ -1308,30 +1285,24 @@ if (existing) {
   msgEl.textContent = 'Relatório salvo!';
   setTimeout(() => { msgEl.textContent = ''; loadDashboard(); }, 1000);
 }
-
 async function loadDashboard() {
   const { data } = await sb.from('cultos').select('*').order('data');
   if (!data) return;
   _allCultosData = data;
-
   const cultos   = data.filter(d => d.tipo === 'culto');
   const midweeks = data.filter(d => d.tipo === 'midweek');
   const oracoes  = data.filter(d => d.tipo === 'oracao');
-
   function fmtDate(d) {
     const [y,m,day] = d.split('-');
     return `${day}/${m}/${y.slice(2)}`;
   }
-
   function avg(arr) { return arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : 0; }
   function sum(arr) { return arr.reduce((a,b)=>a+b,0); }
-
   const brown  = '#976655';
   const brownL = '#C4968A';
   const green  = '#5B8C5A';
   const blue   = '#4A7FA5';
   const pale   = '#F0EAE7';
-
   function makeChart(id, type, labels, datasets, opts={}) {
     if (charts[id]) charts[id].destroy();
     const ctx = document.getElementById(id);
@@ -1351,7 +1322,6 @@ async function loadDashboard() {
       }
     });
   }
-
   function renderStats(elId, items) {
     const el = document.getElementById(elId);
     if (!el || !items.length) { if(el) el.innerHTML=''; return; }
@@ -1361,7 +1331,6 @@ async function loadDashboard() {
         <span class="ds-val">${it.val}</span>
       </div>`).join('');
   }
-
   // ── CULTOS ──
   if (cultos.length) {
     const pastores  = cultos.map(d => d.pastores  || 0);
@@ -1383,7 +1352,6 @@ async function loadDashboard() {
       { label:'Total Cultos',      val: cultos.length }
     ]);
   }
-
   // ── VISITANTES ──
   if (cultos.length) {
     const vis = cultos.map(d => d.visitantes || 0);
@@ -1397,7 +1365,6 @@ async function loadDashboard() {
       { label:'Máximo', val: Math.max(...vis) }
     ]);
   }
-
   // ── ORAÇÃO ──
   if (oracoes.length) {
     const part = oracoes.map(d => d.participantes || 0);
@@ -1415,7 +1382,6 @@ async function loadDashboard() {
       { label:'Total Orações',       val: oracoes.length }
     ]);
   }
-
   // ── MIDWEEK ──
   if (midweeks.length) {
     const pastores = midweeks.map(d => d.pastores  || 0);
@@ -1438,19 +1404,16 @@ async function loadDashboard() {
     ]);
   }
 }
-
 // ═══════════════════════════════════════════════════════════
 // FORMAT BAR
 // ═══════════════════════════════════════════════════════════
 const formatBar = document.getElementById('format-bar');
 let lastRange = null;
-
 function getEditable(node) {
   let el = node.nodeType === 3 ? node.parentElement : node;
   while (el) { if (el.contentEditable === 'true') return el; el = el.parentElement; }
   return null;
 }
-
 function positionFormatBar() {
   const sel = window.getSelection();
   if (!sel || sel.isCollapsed || !sel.rangeCount) { formatBar.style.display='none'; return; }
@@ -1471,7 +1434,6 @@ function positionFormatBar() {
   document.getElementById('fbar-bold').classList.toggle('active', document.queryCommandState('bold'));
   document.getElementById('fbar-italic').classList.toggle('active', document.queryCommandState('italic'));
 }
-
 function applyFmt(e, cmd) {
   e.preventDefault();
   if (lastRange) { const s=window.getSelection(); s.removeAllRanges(); s.addRange(lastRange); }
@@ -1479,7 +1441,6 @@ function applyFmt(e, cmd) {
   document.execCommand(cmd, false, null);
   positionFormatBar();
 }
-
 function applySize(e, size) {
   e.preventDefault();
   if (lastRange) { const s=window.getSelection(); s.removeAllRanges(); s.addRange(lastRange); }
@@ -1493,14 +1454,12 @@ function applySize(e, size) {
   });
   positionFormatBar();
 }
-
 document.addEventListener('mouseup',  () => setTimeout(positionFormatBar, 10));
 document.addEventListener('keyup',    () => setTimeout(positionFormatBar, 10));
 document.addEventListener('touchend', () => setTimeout(positionFormatBar, 200));
 document.addEventListener('selectionchange', () => {
   if (window.getSelection()?.isCollapsed) formatBar.style.display = 'none';
 });
-
 // ═══════════════════════════════════════════════════════════
 // DEPT BOX
 // ═══════════════════════════════════════════════════════════
@@ -1524,7 +1483,6 @@ function addDeptBox() {
          ontouchstart="dboxResize(event,this.closest('.dept-box'))">⤡</div>`;
   layer.appendChild(box);
 }
-
 function dboxDrag(e, box) {
   if (e.target.closest('[contenteditable]') || e.target.closest('.dbox-btn')) return;
   e.preventDefault();
@@ -1543,7 +1501,6 @@ function dboxDrag(e, box) {
   document.addEventListener('mousemove',onMove); document.addEventListener('mouseup',onUp);
   document.addEventListener('touchmove',onMove,{passive:true}); document.addEventListener('touchend',onUp);
 }
-
 function dboxResize(e,box) {
   e.preventDefault(); e.stopPropagation();
   const touch=e.touches?e.touches[0]:e;
@@ -1561,7 +1518,6 @@ function dboxResize(e,box) {
   document.addEventListener('mousemove',onMove); document.addEventListener('mouseup',onUp);
   document.addEventListener('touchmove',onMove,{passive:true}); document.addEventListener('touchend',onUp);
 }
-
 function dboxColor(btn) {
   const box=btn.closest('.dept-box');
   const input=document.createElement('input'); input.type='color';
@@ -1575,14 +1531,12 @@ function dboxColor(btn) {
   };
   input.click();
 }
-
 function rgbToHex(rgb) {
   if(!rgb||rgb.startsWith('#'))return rgb;
   const m=rgb.match(/\d+/g);
   if(!m)return '#976655';
   return '#'+m.slice(0,3).map(x=>parseInt(x).toString(16).padStart(2,'0')).join('');
 }
-
 // ═══════════════════════════════════════════════════════════
 // MENU
 // ═══════════════════════════════════════════════════════════
@@ -1598,7 +1552,6 @@ function closeAllMenus() {
 }
 document.addEventListener('click', closeAllMenus);
 document.addEventListener('touchstart', closeAllMenus, {passive:true});
-
 // ═══════════════════════════════════════════════════════════
 // CARD COLOR
 // ═══════════════════════════════════════════════════════════
@@ -1610,7 +1563,6 @@ function openCardColor(btn) {
   input.oninput=e=>applyCardColor(node,e.target.value);
   input.click();
 }
-
 function applyCardColor(node, hex) {
   node.style.background=hex; node.style.border='none';
   node.style.boxShadow='0 6px 20px '+hex+'55';
@@ -1624,7 +1576,6 @@ function applyCardColor(node, hex) {
   node.querySelectorAll('.photo-circle').forEach(el=>el.style.borderColor=dark?'rgba(255,255,255,.4)':'rgba(151,102,85,.28)');
   node.querySelectorAll('.menu-trigger').forEach(el=>el.style.color=dark?'rgba(255,255,255,.8)':'#888');
 }
-
 // ═══════════════════════════════════════════════════════════
 // PHOTO
 // ═══════════════════════════════════════════════════════════
@@ -1643,7 +1594,6 @@ function uploadPhoto(circle) {
   };
   input.click();
 }
-
 // ═══════════════════════════════════════════════════════════
 // COUNTERS
 // ═══════════════════════════════════════════════════════════
@@ -1674,11 +1624,9 @@ function updateCounters() {
   document.getElementById('cnt-vol').textContent     = vol;
   document.getElementById('cnt-total').textContent   = pcampos + pastor + ltp + lider + vol;
 }
-
 // Watch for DOM changes to update counters
 const counterObserver = new MutationObserver(() => setTimeout(updateCounters, 100));
 counterObserver.observe(document.getElementById('org-root'), { childList:true, subtree:true, characterData:true });
-
 // ═══════════════════════════════════════════════════════════
 // COLLAPSE/EXPAND
 // ═══════════════════════════════════════════════════════════
@@ -1694,7 +1642,6 @@ window.toggleChildren = function(btn) {
   btn.textContent=collapsed?'▾':'▸';
   btn.title=collapsed?'Ocultar filhos':'Mostrar filhos';
 };
-
 function addToggle(col) {
   const node=col.querySelector(':scope > .org-node');
   const ch=col.querySelector(':scope > .org-children');
@@ -1706,11 +1653,9 @@ function addToggle(col) {
   b.setAttribute('onclick','toggleChildren(this)');
   node.appendChild(b);
 }
-
 const toggleObserver = new MutationObserver(() => {
   document.querySelectorAll('.org-col').forEach(addToggle);
 });
-
 // ═══════════════════════════════════════════════════════════
 // CREATE NODE
 // ═══════════════════════════════════════════════════════════
@@ -1749,7 +1694,6 @@ function makeCol(depth, opts={}) {
     </div>`;
   return col;
 }
-
 // ═══════════════════════════════════════════════════════════
 // TREE OPERATIONS
 // ═══════════════════════════════════════════════════════════
@@ -1759,7 +1703,6 @@ function addSibling(btn) {
   col.after(makeCol(depth));
   scheduleChartSave();
 }
-
 function addChild(btn) {
   const col=btn.closest('.org-col');
   const depth=parseInt(col.querySelector(':scope > .org-node').dataset.depth);
@@ -1771,19 +1714,16 @@ function addChild(btn) {
   ch.appendChild(makeCol(depth+1));
   addToggle(col);
 }
-
 function moveLeft(btn) {
   const col=btn.closest('.org-col');
   const prev=col.previousElementSibling;
   if(prev&&prev.classList.contains('org-col'))col.parentElement.insertBefore(col,prev);
 }
-
 function moveRight(btn) {
   const col=btn.closest('.org-col');
   const next=col.nextElementSibling;
   if(next&&next.classList.contains('org-col'))col.parentElement.insertBefore(next,col);
 }
-
 function deleteNode(btn) {
   const col=btn.closest('.org-col');
   const parent=col.parentElement;
@@ -1794,11 +1734,9 @@ function deleteNode(btn) {
     parent.remove();
   }
 }
-
 function addRootNode() {
   document.getElementById('org-root').appendChild(makeCol(0));
 }
-
 // ═══════════════════════════════════════════════════════════
 // SAVE
 // ═══════════════════════════════════════════════════════════
@@ -1816,7 +1754,6 @@ function saveFile() {
   a.click();
   URL.revokeObjectURL(a.href);
 }
-
 // ═══════════════════════════════════════════════════════════
 // CHURCH DATA & INIT
 // ═══════════════════════════════════════════════════════════
@@ -1924,7 +1861,6 @@ const CHURCH = {
     ]}
   ]
 };
-
 // ── SALVAR ORGANOGRAMA NO SUPABASE ──
 function serializeTree(col) {
   const node = col.querySelector(':scope > .org-node');
@@ -1944,7 +1880,6 @@ function serializeTree(col) {
   }
   return obj;
 }
-
 let _saveTimer = null;
 function scheduleChartSave() {
   if (!currentProfile || (currentProfile.role !== 'admin' && !currentProfile.can_edit)) return;
@@ -1958,7 +1893,6 @@ function scheduleChartSave() {
     console.log('Organograma salvo.');
   }, 800);
 }
-
 function initAutoSave() {
   const root = document.getElementById('org-root');
   // Auto-save quando qualquer campo editável perder o foco
@@ -1970,7 +1904,6 @@ function _onChartBlur(e) {
     scheduleChartSave();
   }
 }
-
 function buildTree(data, depth) {
   const col = makeCol(depth, {
     name:  data.name  || 'Novo card',
@@ -1992,7 +1925,6 @@ function buildTree(data, depth) {
   }
   return col;
 }
-
 function initChart(savedData) {
   const root = document.getElementById('org-root');
   if (root.childElementCount > 0) {
@@ -2034,20 +1966,17 @@ function initChart(savedData) {
   initDragDrop();
   initAutoSave();
 }
-
 // ── DRAG & DROP (mouse events) ──
 let _dragSrc   = null;
 let _dragClone = null;
 let _dragStartX = 0;
 let _dragStartY = 0;
 let _isDragging = false;
-
 function initDragDrop() {
   const root = document.getElementById('org-root');
   root.removeEventListener('mousedown', _onDragMouseDown, true);
   root.addEventListener('mousedown', _onDragMouseDown, true);
 }
-
 function _onDragMouseDown(e) {
   const handle = e.target.closest('.drag-handle');
   if (!handle) return;
@@ -2062,7 +1991,6 @@ function _onDragMouseDown(e) {
   document.addEventListener('mousemove', _onDragMouseMove, true);
   document.addEventListener('mouseup',   _onDragMouseUp,   true);
 }
-
 function _onDragMouseMove(e) {
   if (!_dragSrc) return;
   const dx = e.clientX - _dragStartX;
@@ -2090,7 +2018,6 @@ function _onDragMouseMove(e) {
     }
   }
 }
-
 function _onDragMouseUp(e) {
   document.removeEventListener('mousemove', _onDragMouseMove, true);
   document.removeEventListener('mouseup',   _onDragMouseUp,   true);
@@ -2123,7 +2050,6 @@ function _onDragMouseUp(e) {
   if (_dragSrc) { _dragSrc.classList.remove('dragging'); _dragSrc = null; }
   _isDragging = false;
 }
-
 function _updateDepths(col, depth) {
   const d = Math.min(depth, 5);
   const node = col.querySelector(':scope > .org-node');
@@ -2131,14 +2057,10 @@ function _updateDepths(col, depth) {
   const ch = col.querySelector(':scope > .org-children');
   if (ch) ch.querySelectorAll(':scope > .org-col').forEach(child => _updateDepths(child, depth + 1));
 }
-
-
 // ══════════════════════════════════════════════════════════════════
 // ABA HIERARQUIA
 // ══════════════════════════════════════════════════════════════════
 let _hierData = [];
-
-
 function extractFromTree(col, parentName) {
   const node = col.querySelector(':scope > .org-node');
   if (!node) return;
@@ -2151,13 +2073,11 @@ function extractFromTree(col, parentName) {
   const ch = col.querySelector(':scope > .org-children');
   if (ch) ch.querySelectorAll(':scope > .org-col').forEach(c => extractFromTree(c, name));
 }
-
 function loadHierarquia() {
   _hierData = [];
   document.querySelectorAll('#org-root > .org-col').forEach(col => extractFromTree(col, null));
   renderHierList();
 }
-
 function renderHierList() {
   const q       = (document.getElementById('hier-search')?.value || '').toLowerCase();
   const fNivel  = document.getElementById('hier-filter-nivel')?.value  || '';
@@ -2195,7 +2115,6 @@ function renderHierList() {
       <td><button class="btn-outline" style="font-size:11px;padding:4px 10px;" onclick="editHierMembro(${i})">✏ Editar</button></td>
     </tr>`).join('');
 }
-
 function openAddMembro() {
   const modal = document.getElementById('modal-hier');
   document.getElementById('modal-hier-title').textContent = 'Adicionar à Equipe';
@@ -2217,7 +2136,6 @@ function openAddMembro() {
   modal.style.display = 'flex';
   document.getElementById('hier-msg').textContent = '';
 }
-
 function editHierMembro(idx) {
   const m = _hierData[idx];
   if (!m) return;
@@ -2234,7 +2152,6 @@ function editHierMembro(idx) {
     fprev._base64 = m.photo;
   }
 }
-
 function previewHierFoto(input) {
   if (!input.files || !input.files[0]) return;
   const reader = new FileReader();
@@ -2245,7 +2162,6 @@ function previewHierFoto(input) {
   };
   reader.readAsDataURL(input.files[0]);
 }
-
 function saveHierMembro() {
   const nome   = document.getElementById('hier-nome').value.trim();
   const nivel  = document.getElementById('hier-nivel').value.trim();
@@ -2254,9 +2170,7 @@ function saveHierMembro() {
   const photo  = document.getElementById('hier-foto-preview')._base64 || null;
   const msg    = document.getElementById('hier-msg');
   if (!nome) { msg.textContent = '⚠ Nome obrigatório.'; msg.style.color='var(--error)'; return; }
-
   const editIdx = document.getElementById('hier-edit-id').value;
-
   if (editIdx !== '') {
     // Edit existing node in DOM
     const idx = parseInt(editIdx);
@@ -2318,11 +2232,9 @@ function saveHierMembro() {
     scheduleChartSave();
     updateCounters();
   }
-
   document.getElementById('modal-hier').style.display = 'none';
   loadHierarquia();
 }
-
 function exportHierXLSX() {
   loadHierarquia(); // garante dados atualizados
   const ws = XLSX.utils.json_to_sheet(_hierData.map(m => ({
@@ -2335,7 +2247,6 @@ function exportHierXLSX() {
   XLSX.utils.book_append_sheet(wb, ws, 'Hierarquia');
   XLSX.writeFile(wb, 'hierarquia-bela-vista.xlsx');
 }
-
 function importHierXLSX(input) {
   if (!input.files || !input.files[0]) return;
   const reader = new FileReader();
@@ -2381,7 +2292,6 @@ function importHierXLSX(input) {
   reader.readAsArrayBuffer(input.files[0]);
   input.value = '';
 }
-
 // ══════════════════════════════════════════════════════════════════
 // ABA UGROUPS
 // ══════════════════════════════════════════════════════════════════
@@ -2389,7 +2299,6 @@ let _ugData = [];
 let _ugMap  = null;
 let _ugMarkers = [];
 let _ugEditFotoB64 = null;
-
 async function loadUGroups() {
   const { data, error } = await sb.from('ugroups').select('*').order('created_at', { ascending: true });
   _ugData = data || [];
@@ -2397,7 +2306,6 @@ async function loadUGroups() {
   if (!_ugMap) initUGMap();
   else refreshUGMarkers();
 }
-
 function initUGMap() {
   const mapEl = document.getElementById('ug-map');
   if (!mapEl) return;
@@ -2407,7 +2315,6 @@ function initUGMap() {
   }).addTo(_ugMap);
   refreshUGMarkers();
 }
-
 function refreshUGMarkers() {
   if (!_ugMap) return;
   _ugMarkers.forEach(m => m.remove());
@@ -2428,13 +2335,11 @@ function refreshUGMarkers() {
     }
   });
 }
-
 function filterUGroups() {
   const q = (document.getElementById('ug-search')?.value || '').toLowerCase();
   const filtered = q ? _ugData.filter(u => (u.nome + ' ' + u.lider_nome + ' ' + u.endereco).toLowerCase().includes(q)) : _ugData;
   renderUGList(filtered);
 }
-
 function renderUGList(list) {
   const el = document.getElementById('ug-list');
   if (!list.length) {
@@ -2452,7 +2357,6 @@ function renderUGList(list) {
       </div>
     </div>`).join('');
 }
-
 function openUGroupDetail(id) {
   const ug = _ugData.find(u => u.id === id);
   if (!ug) return;
@@ -2478,12 +2382,10 @@ function openUGroupDetail(id) {
   modal.style.display = 'flex';
   if (ug.lat && ug.lng && _ugMap) _ugMap.flyTo([ug.lat, ug.lng], 14);
 }
-
 function closeUGroupModal() {
   document.getElementById('modal-ugroup').style.display = 'none';
   document.getElementById('modal-ug-form').style.display = 'none';
 }
-
 function openAddUGroup() {
   _ugEditFotoB64 = null;
   document.getElementById('ug-form-title').textContent = 'Novo uGroup';
@@ -2498,7 +2400,6 @@ function openAddUGroup() {
   fp.innerHTML = '👤'; fp.style.background = 'var(--brown-pale)';
   document.getElementById('modal-ug-form').style.display = 'flex';
 }
-
 function editUGroup(id) {
   const ug = _ugData.find(u => u.id === id);
   if (!ug) return;
@@ -2520,7 +2421,6 @@ function editUGroup(id) {
   document.getElementById('modal-ugroup').style.display = 'none';
   document.getElementById('modal-ug-form').style.display = 'flex';
 }
-
 function previewUGFoto(input) {
   if (!input.files || !input.files[0]) return;
   const reader = new FileReader();
@@ -2531,7 +2431,6 @@ function previewUGFoto(input) {
   };
   reader.readAsDataURL(input.files[0]);
 }
-
 async function saveUGroup() {
   const nome     = document.getElementById('ug-nome').value.trim();
   const endereco = document.getElementById('ug-endereco').value.trim();
@@ -2541,7 +2440,6 @@ async function saveUGroup() {
   const parts    = partsRaw.split('\n').map(s => s.trim()).filter(Boolean);
   const editId   = document.getElementById('ug-edit-id').value;
   if (!nome) { alert('Nome do uGroup é obrigatório.'); return; }
-
   // Geocode address
   let lat = null, lng = null;
   if (endereco) {
@@ -2551,7 +2449,6 @@ async function saveUGroup() {
       if (geoData[0]) { lat = parseFloat(geoData[0].lat); lng = parseFloat(geoData[0].lon); }
     } catch(e) { console.warn('Geocoding failed', e); }
   }
-
   const payload = {
     nome, endereco,
     lider_nome: lider, anfitriao_nome: anf,
@@ -2561,26 +2458,22 @@ async function saveUGroup() {
     lat, lng,
     created_by: currentUser?.id
   };
-
   let error;
   if (editId) {
     ({ error } = await sb.from('ugroups').update(payload).eq('id', editId));
   } else {
     ({ error } = await sb.from('ugroups').insert(payload));
   }
-
   if (error) { alert('Erro ao salvar: ' + error.message); return; }
   document.getElementById('modal-ug-form').style.display = 'none';
   await loadUGroups();
 }
-
 async function deleteUGroup(id) {
   if (!confirm('Excluir este uGroup?')) return;
   await sb.from('ugroups').delete().eq('id', id);
   document.getElementById('modal-ugroup').style.display = 'none';
   await loadUGroups();
 }
-
 function exportUGroupsXLSX() {
   const ws = XLSX.utils.json_to_sheet(_ugData.map(u => ({
     Nome: u.nome,
@@ -2595,7 +2488,6 @@ function exportUGroupsXLSX() {
   XLSX.utils.book_append_sheet(wb, ws, 'uGroups');
   XLSX.writeFile(wb, 'ugroups-bela-vista.xlsx');
 }
-
 async function importUGroupsXLSX(input) {
   if (!input.files || !input.files[0]) return;
   const reader = new FileReader();
@@ -2621,13 +2513,11 @@ async function importUGroupsXLSX(input) {
   reader.readAsArrayBuffer(input.files[0]);
   input.value = '';
 }
-
 // ══════════════════════════════════════════════════════════════════
 // ABA MEMBROS
 // ══════════════════════════════════════════════════════════════════
 let _membrosData = [];
 let _memFotoB64  = null;
-
 async function loadMembros() {
   const { data } = await sb.from('membros').select('*, ugroups(nome)').order('created_at', { ascending: false });
   _membrosData = data || [];
@@ -2696,7 +2586,6 @@ function renderMembrosList() {
       </td>
     </tr>`).join('');
 }
-
 function openAddMembroForm() {
   _memFotoB64 = null;
   document.getElementById('mem-modal-title').textContent = 'Novo Membro';
@@ -2714,7 +2603,6 @@ function openAddMembroForm() {
   document.getElementById('mem-msg').textContent = '';
   document.getElementById('modal-membro').style.display = 'flex';
 }
-
 function openEditMembro(id) {
   const m = _membrosData.find(x => x.id === id);
   if (!m) return;
@@ -2736,7 +2624,6 @@ function openEditMembro(id) {
   document.getElementById('mem-msg').textContent = '';
   document.getElementById('modal-membro').style.display = 'flex';
 }
-
 function previewMemFoto(input) {
   if (!input.files || !input.files[0]) return;
   const reader = new FileReader();
@@ -2747,14 +2634,12 @@ function previewMemFoto(input) {
   };
   reader.readAsDataURL(input.files[0]);
 }
-
 // Show/hide "Outro" field
 document.addEventListener('change', e => {
   if (e.target.id === 'mem-como') {
     document.getElementById('mem-como-outro-row').style.display = e.target.value === 'Outro' ? '' : 'none';
   }
 });
-
 async function saveMembroForm() {
   const nome    = document.getElementById('mem-nome').value.trim();
   const sexo    = document.getElementById('mem-sexo').value;
@@ -2766,7 +2651,6 @@ async function saveMembroForm() {
   const editId  = document.getElementById('mem-edit-id').value;
   const msg     = document.getElementById('mem-msg');
   if (!nome) { msg.textContent = '⚠ Nome obrigatório.'; msg.style.color = 'var(--error)'; return; }
-
   const payload = {
     foto: _memFotoB64,
     nome_completo: nome,
@@ -2777,25 +2661,21 @@ async function saveMembroForm() {
     ugroup_id: ugId,
     created_by: currentUser?.id
   };
-
   let error;
   if (editId) {
     ({ error } = await sb.from('membros').update(payload).eq('id', editId));
   } else {
     ({ error } = await sb.from('membros').insert(payload));
   }
-
   if (error) { msg.textContent = 'Erro: ' + error.message; msg.style.color = 'var(--error)'; return; }
   document.getElementById('modal-membro').style.display = 'none';
   await loadMembros();
 }
-
 async function deleteMembro(id) {
   if (!confirm('Excluir este membro?')) return;
   await sb.from('membros').delete().eq('id', id);
   await loadMembros();
 }
-
 function exportMembrosXLSX() {
   const ws = XLSX.utils.json_to_sheet(_membrosData.map(m => ({
     Nome: m.nome_completo,
@@ -2809,7 +2689,6 @@ function exportMembrosXLSX() {
   XLSX.utils.book_append_sheet(wb, ws, 'Membros');
   XLSX.writeFile(wb, 'membros-bela-vista.xlsx');
 }
-
 async function importMembrosXLSX(input) {
   if (!input.files || !input.files[0]) return;
   const reader = new FileReader();
@@ -2848,24 +2727,18 @@ const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
   reader.readAsArrayBuffer(input.files[0]);
   input.value = '';
 }
-
 let _allCultosData = [];
-
 async function applyDashFilter() {
   const de   = document.getElementById('dash-filter-de').value;
   const ate  = document.getElementById('dash-filter-ate').value;
   const tipo = document.getElementById('dash-filter-tipo').value;
   const el   = document.getElementById('dash-filter-result');
-
   let filtered = _allCultosData;
   if (de)   filtered = filtered.filter(r => r.data >= de);
   if (ate)  filtered = filtered.filter(r => r.data <= ate);
   if (tipo) filtered = filtered.filter(r => r.tipo === tipo);
-
   if (!filtered.length) { el.innerHTML = '<p style="color:var(--gray);font-size:13px;">Nenhum registro encontrado.</p>'; return; }
-
   function fmtDate(d) { const [y,m,day]=d.split('-'); return `${day}/${m}/${y}`; }
-
   el.innerHTML = `
     <div style="overflow-x:auto;">
     <table class="users-table" style="min-width:500px;">
@@ -2888,7 +2761,6 @@ async function applyDashFilter() {
     </table>
     </div>`;
 }
-
 function clearDashFilter() {
   document.getElementById('dash-filter-de').value = '';
   document.getElementById('dash-filter-ate').value = '';
@@ -2896,6 +2768,48 @@ function clearDashFilter() {
   document.getElementById('dash-filter-result').innerHTML = '';
 }
   
+// ── USER PERMISSIONS & ACTIVE ──
+async function toggleActive(userId, currentlyActive) {
+  if (currentlyActive && !confirm('Desativar este usuário? Ele não conseguirá mais logar.')) return;
+  const { error } = await sb.from('profiles').update({ active: !currentlyActive }).eq('id', userId);
+  if (error) alert('Erro: ' + error.message);
+  else loadUsers();
+}
+
+function openPerms(userId, userName) {
+  document.getElementById('perms-user-id').value = userId;
+  document.getElementById('perms-modal-title').textContent = '🔐 Permissões — ' + userName;
+  document.getElementById('perms-msg').textContent = '';
+  sb.from('profiles').select('perms').eq('id', userId).single().then(({ data }) => {
+    const p = data?.perms || {};
+    document.getElementById('perm-dashboard').checked   = p.dashboard   !== false;
+    document.getElementById('perm-add-culto').checked   = p.add_culto   !== false;
+    document.getElementById('perm-organograma').checked = p.organograma !== false;
+    document.getElementById('perm-edit-org').checked    = p.edit_org    !== false;
+    document.getElementById('perm-hierarquia').checked  = p.hierarquia  !== false;
+    document.getElementById('perm-ugroups').checked     = p.ugroups     !== false;
+    document.getElementById('perm-membros').checked     = p.membros     !== false;
+  });
+  document.getElementById('modal-perms').style.display = 'flex';
+}
+
+async function savePerms() {
+  const userId = document.getElementById('perms-user-id').value;
+  const perms = {
+    dashboard:   document.getElementById('perm-dashboard').checked,
+    add_culto:   document.getElementById('perm-add-culto').checked,
+    organograma: document.getElementById('perm-organograma').checked,
+    edit_org:    document.getElementById('perm-edit-org').checked,
+    hierarquia:  document.getElementById('perm-hierarquia').checked,
+    ugroups:     document.getElementById('perm-ugroups').checked,
+    membros:     document.getElementById('perm-membros').checked,
+  };
+  const { error } = await sb.from('profiles').update({ perms }).eq('id', userId);
+  const el = document.getElementById('perms-msg');
+  if (error) { el.style.color='#e53935'; el.textContent='Erro: '+error.message; }
+  else { el.style.color='#388e3c'; el.textContent='Salvo!'; setTimeout(()=>document.getElementById('modal-perms').style.display='none',800); }
+}
+
 // ── KICK OFF ──
 document.addEventListener('DOMContentLoaded', init);
 </script>
