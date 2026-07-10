@@ -1304,6 +1304,10 @@ async function loadDashboard() {
   const { data } = await sb.from('cultos').select('*').order('data');
   if (!data) return;
   _allCultosData = data;
+  renderDashCharts(data);
+}
+
+function renderDashCharts(data) {
   const cultos   = data.filter(d => d.tipo === 'culto');
   const midweeks = data.filter(d => d.tipo === 'midweek');
   const oracoes  = data.filter(d => d.tipo === 'oracao');
@@ -2753,6 +2757,9 @@ async function applyDashFilter() {
   if (ate)  filtered = filtered.filter(r => r.data <= ate);
   if (tipo) filtered = filtered.filter(r => r.tipo === tipo);
   if (!filtered.length) { el.innerHTML = '<p style="color:var(--gray);font-size:13px;">Nenhum registro encontrado.</p>'; return; }
+  // Atualiza gráficos com dados filtrados
+  renderDashCharts(filtered);
+  // Mostra tabela
   function fmtDate(d) { const [y,m,day]=d.split('-'); return `${day}/${m}/${y}`; }
   el.innerHTML = `
     <div style="overflow-x:auto;">
@@ -2781,6 +2788,8 @@ function clearDashFilter() {
   document.getElementById('dash-filter-ate').value = '';
   document.getElementById('dash-filter-tipo').value = '';
   document.getElementById('dash-filter-result').innerHTML = '';
+  // Restaura gráficos com todos os dados
+  renderDashCharts(_allCultosData);
 }
   
 // ── RESET SENHA ──
