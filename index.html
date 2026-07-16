@@ -1330,6 +1330,15 @@ function renderDashCharts(data) {
     if (charts[id]) charts[id].destroy();
     const ctx = document.getElementById(id);
     if (!ctx) return;
+    // Aviso de últimos 12 registros
+    const card = ctx.closest('.dash-card');
+    if (card && !card.querySelector('.chart-notice')) {
+      const notice = document.createElement('div');
+      notice.className = 'chart-notice';
+      notice.textContent = '📌 Exibindo os últimos 12 registros';
+      notice.style.cssText = 'font-size:11px;color:#976655;opacity:.75;margin:-6px 0 10px;letter-spacing:.3px;';
+      ctx.before(notice);
+    }
     charts[id] = new Chart(ctx, {
       type,
       data: { labels, datasets },
