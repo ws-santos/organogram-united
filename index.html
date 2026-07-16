@@ -1311,10 +1311,11 @@ function renderDashCharts(data) {
   const cultos   = data.filter(d => d.tipo === 'culto');
   const midweeks = data.filter(d => d.tipo === 'midweek');
   const oracoes  = data.filter(d => d.tipo === 'oracao');
-  function fmtDate(d) {
-    const [y,m,day] = d.split('-');
-    return `${day}/${m}/${y.slice(2)}`;
-  }
+  // Gráfico: últimos 12 — stats calculam sobre todos
+  const cultosG   = cultos.slice(-12);
+  const midweeksG = midweeks.slice(-12);
+  const oracoesG  = oracoes.slice(-12);
+  function fmtDate(d) { const [y,m,day] = d.split('-'); return `${day}/${m}/${y.slice(2)}`; }
   function avg(arr) { return arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : 0; }
   function sum(arr) { return arr.reduce((a,b)=>a+b,0); }
   const brown  = '#976655';
@@ -1322,10 +1323,19 @@ function renderDashCharts(data) {
   const green  = '#5B8C5A';
   const blue   = '#4A7FA5';
   const pale   = '#F0EAE7';
+  const subtitulo = '<div style="font-size:10px;color:var(--gray);margin:-10px 0 10px;letter-spacing:0.5px;">📌 Exibindo os últimos 12 registros</div>';
   function makeChart(id, type, labels, datasets, opts={}) {
     if (charts[id]) charts[id].destroy();
     const ctx = document.getElementById(id);
     if (!ctx) return;
+    // Inserir subtítulo se ainda não existir
+    const card = ctx.closest('.dash-card');
+    if (card && !card.querySelector('.chart-sub')) {
+      const sub = document.createElement('div');
+      sub.className = 'chart-sub';
+      sub.innerHTML = subtitulo;
+      ctx.before(sub);
+    }
     charts[id] = new Chart(ctx, {
       type,
       data: { labels, datasets },
@@ -1352,73 +1362,137 @@ function renderDashCharts(data) {
   }
   // ── CULTOS ──
   if (cultos.length) {
-    const pastores  = cultos.map(d => d.pastores  || 0);
-    const lideres   = cultos.map(d => d.lideres   || 0);
-    const membros   = cultos.map(d => d.membros   || 0);
-    const vols      = cultos.map(d => d.voluntarios || 0);
-    const labels    = cultos.map(d => fmtDate(d.data));
+    const labels = cultosG.map(d => fmtDate(d.data));
     makeChart('chart-cultos', 'line', labels, [
-      { label:'Pastores',    data:pastores, borderColor:blue,   backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[2,3] },
-      { label:'Líderes',     data:lideres,  borderColor:green,  backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[4,2] },
-      { label:'Membros',     data:membros,  borderColor:brown,  backgroundColor:pale+'80', fill:true, tension:0.3, pointRadius:4 },
-      { label:'Voluntários', data:vols,     borderColor:brownL, backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[4,3] }
+      { label:'Pastores',    data:cultosG.map(d=>d.pastores||0),    borderColor:blue,   backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[2,3] },
+      { label:'Líderes',     data:cultosG.map(d=>d.lideres||0),     borderColor:green,  backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[4,2] },
+      { label:'Membros',     data:cultosG.map(d=>d.membros||0),     borderColor:brown,  backgroundColor:pale+'80', fill:true, tension:0.3, pointRadius:4 },
+      { label:'Voluntários', data:cultosG.map(d=>d.voluntarios||0), borderColor:brownL, backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[4,3] }
     ]);
     renderStats('stats-cultos', [
-      { label:'Média Pastores',    val: avg(pastores) },
-      { label:'Média Líderes',     val: avg(lideres)  },
-      { label:'Média Membros',     val: avg(membros)  },
-      { label:'Média Voluntários', val: avg(vols)     },
+      { label:'Média Pastores',    val: avg(cultos.map(d=>d.pastores||0)) },
+      { label:'Média Líderes',     val: avg(cultos.map(d=>d.lideres||0))  },
+      { label:'Média Membros',     val: avg(cultos.map(d=>d.membros||0))  },
+      { label:'Média Voluntários', val: avg(cultos.map(d=>d.voluntarios||0)) },
       { label:'Total Cultos',      val: cultos.length }
     ]);
   }
   // ── VISITANTES ──
   if (cultos.length) {
-    const vis = cultos.map(d => d.visitantes || 0);
+    const vis    = cultosG.map(d => d.visitantes || 0);
+    const visAll = cultos.map(d => d.visitantes || 0);
     makeChart('chart-visitantes', 'bar',
-      cultos.map(d => fmtDate(d.data)),
+      cultosG.map(d => fmtDate(d.data)),
       [{ label:'Visitantes', data:vis, backgroundColor:brown+'BB', borderRadius:6 }]
     );
     renderStats('stats-visitantes', [
-      { label:'Média',  val: avg(vis)  },
-      { label:'Total',  val: sum(vis)  },
-      { label:'Máximo', val: Math.max(...vis) }
+      { label:'Média',  val: avg(visAll)  },
+      { label:'Total',  val: sum(visAll)  },
+      { label:'Máximo', val: Math.max(...visAll) }
     ]);
   }
   // ── ORAÇÃO ──
   if (oracoes.length) {
-    const part = oracoes.map(d => d.participantes || 0);
-    const vis2 = oracoes.map(d => d.visitantes    || 0);
     makeChart('chart-oracao', 'line',
-      oracoes.map(d => fmtDate(d.data)),
+      oracoesG.map(d => fmtDate(d.data)),
       [
-        { label:'Participantes', data:part, borderColor:brown, backgroundColor:pale+'80', fill:true, tension:0.3, pointRadius:4 },
-        { label:'Visitantes',    data:vis2, borderColor:brownL, backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[4,3] }
+        { label:'Participantes', data:oracoesG.map(d=>d.participantes||0), borderColor:brown,  backgroundColor:pale+'80', fill:true, tension:0.3, pointRadius:4 },
+        { label:'Visitantes',    data:oracoesG.map(d=>d.visitantes||0),    borderColor:brownL, backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[4,3] }
       ]
     );
     renderStats('stats-oracao', [
-      { label:'Média Participantes', val: avg(part) },
-      { label:'Média Visitantes',    val: avg(vis2) },
+      { label:'Média Participantes', val: avg(oracoes.map(d=>d.participantes||0)) },
+      { label:'Média Visitantes',    val: avg(oracoes.map(d=>d.visitantes||0))    },
       { label:'Total Orações',       val: oracoes.length }
     ]);
   }
   // ── MIDWEEK ──
   if (midweeks.length) {
-    const pastores = midweeks.map(d => d.pastores  || 0);
-    const lideres  = midweeks.map(d => d.lideres   || 0);
-    const membros  = midweeks.map(d => d.membros   || 0);
-    const vols     = midweeks.map(d => d.voluntarios || 0);
-    const labels   = midweeks.map(d => fmtDate(d.data));
+    const labels = midweeksG.map(d => fmtDate(d.data));
     makeChart('chart-midweek', 'line', labels, [
-      { label:'Pastores',    data:pastores, borderColor:blue,   backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[2,3] },
-      { label:'Líderes',     data:lideres,  borderColor:green,  backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[4,2] },
-      { label:'Membros',     data:membros,  borderColor:brown,  backgroundColor:pale+'80', fill:true, tension:0.3, pointRadius:4 },
-      { label:'Voluntários', data:vols,     borderColor:brownL, backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[4,3] }
+      { label:'Pastores',    data:midweeksG.map(d=>d.pastores||0),    borderColor:blue,   backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[2,3] },
+      { label:'Líderes',     data:midweeksG.map(d=>d.lideres||0),     borderColor:green,  backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[4,2] },
+      { label:'Membros',     data:midweeksG.map(d=>d.membros||0),     borderColor:brown,  backgroundColor:pale+'80', fill:true, tension:0.3, pointRadius:4 },
+      { label:'Voluntários', data:midweeksG.map(d=>d.voluntarios||0), borderColor:brownL, backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[4,3] }
     ]);
     renderStats('stats-midweek', [
-      { label:'Média Pastores',    val: avg(pastores) },
-      { label:'Média Líderes',     val: avg(lideres)  },
-      { label:'Média Membros',     val: avg(membros)  },
-      { label:'Média Voluntários', val: avg(vols)     },
+      { label:'Média Pastores',    val: avg(midweeks.map(d=>d.pastores||0))    },
+      { label:'Média Líderes',     val: avg(midweeks.map(d=>d.lideres||0))     },
+      { label:'Média Membros',     val: avg(midweeks.map(d=>d.membros||0))     },
+      { label:'Média Voluntários', val: avg(midweeks.map(d=>d.voluntarios||0)) },
+      { label:'Total Midweeks',    val: midweeks.length }
+    ]);
+  }
+}
+  function renderStats(elId, items) {
+    const el = document.getElementById(elId);
+    if (!el || !items.length) { if(el) el.innerHTML=''; return; }
+    el.innerHTML = items.map(it => `
+      <div class="dash-stat">
+        <span class="ds-label">${it.label}</span>
+        <span class="ds-val">${it.val}</span>
+      </div>`).join('');
+  }
+  // ── CULTOS ──
+  if (cultos.length) {
+    const labels = cultosG.map(d => fmtDate(d.data));
+    makeChart('chart-cultos', 'line', labels, [
+      { label:'Pastores',    data:cultosG.map(d=>d.pastores||0),    borderColor:blue,   backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[2,3] },
+      { label:'Líderes',     data:cultosG.map(d=>d.lideres||0),     borderColor:green,  backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[4,2] },
+      { label:'Membros',     data:cultosG.map(d=>d.membros||0),     borderColor:brown,  backgroundColor:pale+'80', fill:true, tension:0.3, pointRadius:4 },
+      { label:'Voluntários', data:cultosG.map(d=>d.voluntarios||0), borderColor:brownL, backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[4,3] }
+    ]);
+    renderStats('stats-cultos', [
+      { label:'Média Pastores',    val: avg(cultos.map(d=>d.pastores||0)) },
+      { label:'Média Líderes',     val: avg(cultos.map(d=>d.lideres||0))  },
+      { label:'Média Membros',     val: avg(cultos.map(d=>d.membros||0))  },
+      { label:'Média Voluntários', val: avg(cultos.map(d=>d.voluntarios||0)) },
+      { label:'Total Cultos',      val: cultos.length }
+    ]);
+  }
+  // ── VISITANTES ──
+  if (cultos.length) {
+    const vis    = cultosG.map(d => d.visitantes || 0);
+    const visAll = cultos.map(d => d.visitantes || 0);
+    makeChart('chart-visitantes', 'bar',
+      cultosG.map(d => fmtDate(d.data)),
+      [{ label:'Visitantes', data:vis, backgroundColor:brown+'BB', borderRadius:6 }]
+    );
+    renderStats('stats-visitantes', [
+      { label:'Média',  val: avg(visAll)  },
+      { label:'Total',  val: sum(visAll)  },
+      { label:'Máximo', val: Math.max(...visAll) }
+    ]);
+  }
+  // ── ORAÇÃO ──
+  if (oracoes.length) {
+    makeChart('chart-oracao', 'line',
+      oracoesG.map(d => fmtDate(d.data)),
+      [
+        { label:'Participantes', data:oracoesG.map(d=>d.participantes||0), borderColor:brown,  backgroundColor:pale+'80', fill:true, tension:0.3, pointRadius:4 },
+        { label:'Visitantes',    data:oracoesG.map(d=>d.visitantes||0),    borderColor:brownL, backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[4,3] }
+      ]
+    );
+    renderStats('stats-oracao', [
+      { label:'Média Participantes', val: avg(oracoes.map(d=>d.participantes||0)) },
+      { label:'Média Visitantes',    val: avg(oracoes.map(d=>d.visitantes||0))    },
+      { label:'Total Orações',       val: oracoes.length }
+    ]);
+  }
+  // ── MIDWEEK ──
+  if (midweeks.length) {
+    const labels = midweeksG.map(d => fmtDate(d.data));
+    makeChart('chart-midweek', 'line', labels, [
+      { label:'Pastores',    data:midweeksG.map(d=>d.pastores||0),    borderColor:blue,   backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[2,3] },
+      { label:'Líderes',     data:midweeksG.map(d=>d.lideres||0),     borderColor:green,  backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[4,2] },
+      { label:'Membros',     data:midweeksG.map(d=>d.membros||0),     borderColor:brown,  backgroundColor:pale+'80', fill:true, tension:0.3, pointRadius:4 },
+      { label:'Voluntários', data:midweeksG.map(d=>d.voluntarios||0), borderColor:brownL, backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[4,3] }
+    ]);
+    renderStats('stats-midweek', [
+      { label:'Média Pastores',    val: avg(midweeks.map(d=>d.pastores||0))    },
+      { label:'Média Líderes',     val: avg(midweeks.map(d=>d.lideres||0))     },
+      { label:'Média Membros',     val: avg(midweeks.map(d=>d.membros||0))     },
+      { label:'Média Voluntários', val: avg(midweeks.map(d=>d.voluntarios||0)) },
       { label:'Total Midweeks',    val: midweeks.length }
     ]);
   }
