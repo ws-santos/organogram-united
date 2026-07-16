@@ -1745,7 +1745,7 @@ function addToggle(col) {
   b.setAttribute('onclick','toggleChildren(this)');
   node.appendChild(b);
 }
-const toggleObserver = new MutationObserver(() => {
+let toggleObserver = new MutationObserver(() => {
   document.querySelectorAll('.org-col').forEach(addToggle);
 });
 // ═══════════════════════════════════════════════════════════
