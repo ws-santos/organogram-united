@@ -648,6 +648,37 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
     <div class="form-group" style="margin-bottom:16px;"><label>Reporta a (parent no organograma)</label>
       <select class="login-field" id="hier-parent" style="margin:0;"></select>
     </div>
+    <hr style="border:none;border-top:1px solid rgba(151,102,85,.15);margin:4px 0 16px;">
+    <p style="font-size:10px;color:var(--brown);font-weight:700;text-transform:uppercase;letter-spacing:1.2px;margin:0 0 12px;">Informações Pessoais</p>
+    <div class="form-row">
+      <div class="form-group" style="margin-bottom:12px;"><label>Sexo</label>
+        <select class="login-field" id="hier-sexo" style="margin:0;">
+          <option value="">Selecione</option>
+          <option value="M">Masculino</option>
+          <option value="F">Feminino</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:12px;"><label>Data de Nascimento</label>
+        <input class="login-field" id="hier-nasc" type="date" style="margin:0;">
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;"><label>Telefone</label>
+      <input class="login-field" id="hier-tel" type="text" placeholder="(11) 9 0000-0000" style="margin:0;">
+    </div>
+    <div class="form-group" style="margin-bottom:12px;"><label>Como Conheceu a Igreja</label>
+      <select class="login-field" id="hier-como" style="margin:0;">
+        <option value="">Selecione</option>
+        <option value="Redes Sociais">Redes Sociais</option>
+        <option value="Indicação">Indicação</option>
+        <option value="Mora no Bairro">Mora no Bairro</option>
+        <option value="Outro">Outro</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:16px;"><label>uGroup</label>
+      <select class="login-field" id="hier-ugroup" style="margin:0;">
+        <option value="">Nenhum</option>
+      </select>
+    </div>
     <div class="modal-actions">
       <button class="btn-submit" onclick="saveHierMembro()">Salvar</button>
       <button class="btn-outline" onclick="document.getElementById('modal-hier').style.display='none'">Cancelar</button>
@@ -1373,25 +1404,24 @@ function renderDashCharts(data) {
       { label:'Voluntários', data:cultosG.map(d=>d.voluntarios||0), borderColor:brownL, backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[4,3] }
     ]);
     renderStats('stats-cultos', [
-      { label:'Média Pastores',    val: avg(cultos.map(d=>d.pastores||0))    },
-      { label:'Média Líderes',     val: avg(cultos.map(d=>d.lideres||0))     },
-      { label:'Média Membros',     val: avg(cultos.map(d=>d.membros||0))     },
-      { label:'Média Voluntários', val: avg(cultos.map(d=>d.voluntarios||0)) },
-      { label:'Total Cultos',      val: cultos.length }
+      { label:'Média Pastores',    val: avg(cultosG.map(d=>d.pastores||0))    },
+      { label:'Média Líderes',     val: avg(cultosG.map(d=>d.lideres||0))     },
+      { label:'Média Membros',     val: avg(cultosG.map(d=>d.membros||0))     },
+      { label:'Média Voluntários', val: avg(cultosG.map(d=>d.voluntarios||0)) },
+      { label:'Total Cultos',      val: cultosG.length }
     ]);
   }
   // ── VISITANTES ──
   if (cultos.length) {
-    const vis    = cultosG.map(d => d.visitantes || 0);
-    const visAll = cultos.map(d => d.visitantes || 0);
+    const vis = cultosG.map(d => d.visitantes || 0);
     makeChart('chart-visitantes', 'bar',
       cultosG.map(d => fmtDate(d.data)),
       [{ label:'Visitantes', data:vis, backgroundColor:brown+'BB', borderRadius:6 }]
     );
     renderStats('stats-visitantes', [
-      { label:'Média',  val: avg(visAll)          },
-      { label:'Total',  val: sum(visAll)           },
-      { label:'Máximo', val: Math.max(...visAll)   }
+      { label:'Média',  val: avg(vis)           },
+      { label:'Total',  val: sum(vis)            },
+      { label:'Máximo', val: Math.max(...vis)    }
     ]);
   }
   // ── ORAÇÃO ──
@@ -1404,9 +1434,9 @@ function renderDashCharts(data) {
       ]
     );
     renderStats('stats-oracao', [
-      { label:'Média Participantes', val: avg(oracoes.map(d=>d.participantes||0)) },
-      { label:'Média Visitantes',    val: avg(oracoes.map(d=>d.visitantes||0))    },
-      { label:'Total Orações',       val: oracoes.length }
+      { label:'Média Participantes', val: avg(oracoesG.map(d=>d.participantes||0)) },
+      { label:'Média Visitantes',    val: avg(oracoesG.map(d=>d.visitantes||0))    },
+      { label:'Total Orações',       val: oracoesG.length }
     ]);
   }
   // ── MIDWEEK ──
@@ -1419,11 +1449,11 @@ function renderDashCharts(data) {
       { label:'Voluntários', data:midweeksG.map(d=>d.voluntarios||0), borderColor:brownL, backgroundColor:'transparent', tension:0.3, pointRadius:3, borderDash:[4,3] }
     ]);
     renderStats('stats-midweek', [
-      { label:'Média Pastores',    val: avg(midweeks.map(d=>d.pastores||0))    },
-      { label:'Média Líderes',     val: avg(midweeks.map(d=>d.lideres||0))     },
-      { label:'Média Membros',     val: avg(midweeks.map(d=>d.membros||0))     },
-      { label:'Média Voluntários', val: avg(midweeks.map(d=>d.voluntarios||0)) },
-      { label:'Total Midweeks',    val: midweeks.length }
+      { label:'Média Pastores',    val: avg(midweeksG.map(d=>d.pastores||0))    },
+      { label:'Média Líderes',     val: avg(midweeksG.map(d=>d.lideres||0))     },
+      { label:'Média Membros',     val: avg(midweeksG.map(d=>d.membros||0))     },
+      { label:'Média Voluntários', val: avg(midweeksG.map(d=>d.voluntarios||0)) },
+      { label:'Total Midweeks',    val: midweeksG.length }
     ]);
   }
 }
@@ -1896,6 +1926,10 @@ function serializeTree(col) {
   };
   const img = node.querySelector('.photo-circle img');
   if (img?.src && img.src.startsWith('data:')) obj.photo = img.src;
+  // Persist extra personal fields
+  ['sexo','nasc','tel','como','ugroup'].forEach(k => {
+    if (node.dataset[k]) obj[k] = node.dataset[k];
+  });
   const ch = col.querySelector(':scope > .org-children');
   if (ch) {
     obj.children = Array.from(ch.querySelectorAll(':scope > .org-col'))
@@ -1940,6 +1974,13 @@ function buildTree(data, depth) {
     const ph  = col.querySelector('.photo-ph');
     if (img) { img.src = data.photo; img.style.display = 'block'; }
     if (ph)  ph.style.display = 'none';
+  }
+  // Restaurar campos extras
+  const node = col.querySelector(':scope > .org-node');
+  if (node) {
+    ['sexo','nasc','tel','como','ugroup'].forEach(k => {
+      if (data[k]) node.dataset[k] = data[k];
+    });
   }
   if (data.children && data.children.length > 0) {
     const vl = document.createElement('div'); vl.className='org-v-line'; col.appendChild(vl);
@@ -2092,7 +2133,14 @@ function extractFromTree(col, parentName) {
   const role  = (node.querySelector('.node-role')?.textContent  || '').trim();
   const img   = node.querySelector('.photo-circle img');
   const photo = (img?.src && img.src.startsWith('data:')) ? img.src : null;
-  _hierData.push({ name, level, role, photo, parentName });
+  _hierData.push({
+    name, level, role, photo, parentName,
+    sexo:         node.dataset.sexo   || '',
+    nascimento:   node.dataset.nasc   || '',
+    telefone:     node.dataset.tel    || '',
+    como_conheceu:node.dataset.como   || '',
+    ugroup:       node.dataset.ugroup || ''
+  });
   const ch = col.querySelector(':scope > .org-children');
   if (ch) ch.querySelectorAll(':scope > .org-col').forEach(c => extractFromTree(c, name));
 }
@@ -2138,13 +2186,17 @@ function renderHierList() {
       <td><button class="btn-outline" style="font-size:11px;padding:4px 10px;" onclick="editHierMembro(${i})">✏ Editar</button></td>
     </tr>`).join('');
 }
-function openAddMembro() {
+async function openAddMembro() {
   const modal = document.getElementById('modal-hier');
   document.getElementById('modal-hier-title').textContent = 'Adicionar à Equipe';
   document.getElementById('hier-edit-id').value = '';
   document.getElementById('hier-nome').value   = '';
   document.getElementById('hier-nivel').value  = '';
   document.getElementById('hier-funcao').value = '';
+  document.getElementById('hier-sexo').value   = '';
+  document.getElementById('hier-nasc').value   = '';
+  document.getElementById('hier-tel').value    = '';
+  document.getElementById('hier-como').value   = '';
   const fprev = document.getElementById('hier-foto-preview');
   fprev.innerHTML = '👤'; fprev.style.background = 'var(--brown-pale)';
   fprev._base64 = null;
@@ -2156,19 +2208,37 @@ function openAddMembro() {
     opt.value = m.name; opt.textContent = m.name + (m.level ? ` (${m.level})` : '');
     sel.appendChild(opt);
   });
+  // Populate uGroup dropdown
+  const ugSel = document.getElementById('hier-ugroup');
+  ugSel.innerHTML = '<option value="">Nenhum</option>';
+  let ugs = _ugData || [];
+  if (!ugs.length) {
+    const { data } = await sb.from('ugroups').select('id, nome').order('nome');
+    ugs = data || [];
+  }
+  ugs.forEach(u => {
+    const o = document.createElement('option'); o.value = u.id; o.textContent = u.nome; ugSel.appendChild(o);
+  });
+  ugSel.value = '';
   modal.style.display = 'flex';
   document.getElementById('hier-msg').textContent = '';
 }
-function editHierMembro(idx) {
+async function editHierMembro(idx) {
   const m = _hierData[idx];
   if (!m) return;
-  openAddMembro();
+  await openAddMembro();
   document.getElementById('modal-hier-title').textContent = 'Editar Membro';
   document.getElementById('hier-edit-id').value = idx;
   document.getElementById('hier-nome').value    = m.name  || '';
   document.getElementById('hier-nivel').value   = m.level || '';
   document.getElementById('hier-funcao').value  = m.role  || '';
   document.getElementById('hier-parent').value  = m.parentName || '';
+  // Extra fields
+  document.getElementById('hier-sexo').value  = m.sexo          || '';
+  document.getElementById('hier-nasc').value  = m.nascimento    || '';
+  document.getElementById('hier-tel').value   = m.telefone      || '';
+  document.getElementById('hier-como').value  = m.como_conheceu || '';
+  document.getElementById('hier-ugroup').value = m.ugroup       || '';
   if (m.photo) {
     const fprev = document.getElementById('hier-foto-preview');
     fprev.innerHTML = `<img src="${m.photo}" style="width:100%;height:100%;object-fit:cover;">`;
@@ -2191,8 +2261,20 @@ function saveHierMembro() {
   const funcao = document.getElementById('hier-funcao').value.trim();
   const parent = document.getElementById('hier-parent').value.trim();
   const photo  = document.getElementById('hier-foto-preview')._base64 || null;
+  const sexo   = document.getElementById('hier-sexo').value;
+  const nasc   = document.getElementById('hier-nasc').value;
+  const tel    = document.getElementById('hier-tel').value.trim();
+  const como   = document.getElementById('hier-como').value;
+  const ugroup = document.getElementById('hier-ugroup').value;
   const msg    = document.getElementById('hier-msg');
   if (!nome) { msg.textContent = '⚠ Nome obrigatório.'; msg.style.color='var(--error)'; return; }
+  function applyExtras(node) {
+    node.dataset.sexo   = sexo;
+    node.dataset.nasc   = nasc;
+    node.dataset.tel    = tel;
+    node.dataset.como   = como;
+    node.dataset.ugroup = ugroup;
+  }
   const editIdx = document.getElementById('hier-edit-id').value;
   if (editIdx !== '') {
     // Edit existing node in DOM
@@ -2219,6 +2301,7 @@ function saveHierMembro() {
         if (img) { img.src = photo; img.style.display = 'block'; }
         if (ph)  ph.style.display = 'none';
       }
+      applyExtras(found);
     }
     scheduleChartSave();
     updateCounters();
@@ -2235,12 +2318,14 @@ function saveHierMembro() {
       ? parseInt(targetCol.querySelector(':scope > .org-node')?.dataset.depth || '0') + 1
       : 0;
     const newCol = makeCol(depth, { name: nome, level: nivel, role: funcao, emoji: '👤' });
+    const newNode = newCol.querySelector(':scope > .org-node');
     if (photo) {
-      const img = newCol.querySelector('.photo-circle img');
-      const ph  = newCol.querySelector('.photo-ph');
+      const img = newNode.querySelector('.photo-circle img');
+      const ph  = newNode.querySelector('.photo-ph');
       if (img) { img.src = photo; img.style.display = 'block'; }
       if (ph)  ph.style.display = 'none';
     }
+    if (newNode) applyExtras(newNode);
     if (targetCol) {
       let ch = targetCol.querySelector(':scope > .org-children');
       if (!ch) {
@@ -2605,6 +2690,7 @@ function renderMembrosList() {
       <td style="font-size:12px;">${m.ugroups?.nome || '—'}</td>
       <td>
         <button class="btn-outline" style="font-size:11px;padding:4px 10px;margin-right:4px;" onclick="openEditMembro('${m.id}')">✏</button>
+        <button class="btn-outline" style="font-size:11px;padding:4px 10px;margin-right:4px;color:var(--brown);" title="Tornar Voluntário" onclick="tornarVoluntario('${m.id}')">🌟</button>
         <button class="btn-outline" style="font-size:11px;padding:4px 10px;color:var(--error);" onclick="deleteMembro('${m.id}')">×</button>
       </td>
     </tr>`).join('');
@@ -2693,6 +2779,26 @@ async function saveMembroForm() {
   if (error) { msg.textContent = 'Erro: ' + error.message; msg.style.color = 'var(--error)'; return; }
   document.getElementById('modal-membro').style.display = 'none';
   await loadMembros();
+}
+async function tornarVoluntario(id) {
+  const m = _membrosData.find(x => x.id === id);
+  if (!m) return;
+  // Garante que a aba hierarquia está carregada para popular o dropdown "Reporta a"
+  if (!_hierData.length) loadHierarquia();
+  await openAddMembro();
+  document.getElementById('modal-hier-title').textContent = '🌟 Tornar Voluntário';
+  // Pré-preenche com dados do membro
+  document.getElementById('hier-nome').value  = m.nome_completo || '';
+  document.getElementById('hier-sexo').value  = m.sexo || '';
+  document.getElementById('hier-nasc').value  = m.data_nascimento || '';
+  document.getElementById('hier-tel').value   = m.telefone || '';
+  document.getElementById('hier-como').value  = m.como_conheceu || '';
+  document.getElementById('hier-ugroup').value = m.ugroup_id || '';
+  if (m.foto) {
+    const fprev = document.getElementById('hier-foto-preview');
+    fprev.innerHTML = `<img src="${m.foto}" style="width:100%;height:100%;object-fit:cover;">`;
+    fprev._base64 = m.foto;
+  }
 }
 async function deleteMembro(id) {
   if (!confirm('Excluir este membro?')) return;
