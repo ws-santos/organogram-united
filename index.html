@@ -65,7 +65,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 /* Organograma ocupa toda a viewport — scroll horizontal sempre visível no fundo da tela */
 @media(min-width:701px){
-  #pane-organograma{display:flex;flex-direction:column;height:calc(100vh - 56px);overflow:hidden;}
+  #pane-organograma.active{display:flex;flex-direction:column;height:calc(100vh - 56px);overflow:hidden;}
   #pane-organograma main{flex:1;overflow:auto;padding-bottom:20px;scrollbar-width:thin;scrollbar-color:var(--brown-l) var(--brown-pale);}
   #pane-organograma main::-webkit-scrollbar{height:8px;width:8px;}
   #pane-organograma main::-webkit-scrollbar-track{background:var(--brown-pale);border-radius:4px;}
@@ -2230,7 +2230,8 @@ function renderHierList() {
       <td style="font-size:12px;color:var(--gray2);">${m.role || '—'}</td>
       <td style="white-space:nowrap;">
   <button class="btn-outline" style="font-size:11px;padding:4px 10px;margin-right:4px;" onclick="editHierMembro(${_hierData.indexOf(m)})">✏ Editar</button>
-  <button class="btn-outline" style="font-size:11px;padding:4px 10px;color:var(--brown);" title="Tornar Membro" onclick="tornarMembro(${_hierData.indexOf(m)})">👤 Membro</button>
+  <button class="btn-outline" style="font-size:11px;padding:4px 10px;margin-right:4px;color:var(--brown);" title="Tornar Membro" onclick="tornarMembro(${_hierData.indexOf(m)})">👤 Membro</button>
+  <button class="btn-outline" style="font-size:11px;padding:4px 10px;color:#e53935;border-color:#e53935;" title="Excluir" onclick="deleteHierMembro(${_hierData.indexOf(m)})">× Excluir</button>
 </td>
     </tr>`).join('');
 }
@@ -2292,6 +2293,29 @@ async function editHierMembro(idx) {
     fprev.innerHTML = `<img src="${m.photo}" style="width:100%;height:100%;object-fit:cover;">`;
     fprev._base64 = m.photo;
   }
+}
+function deleteHierMembro(idx) {
+  const m = _hierData[idx];
+  if (!m) return;
+  if (!confirm(`Excluir "${m.name}" da equipe?\n\nEsta ação remove o card do organograma.`)) return;
+  document.querySelectorAll('.org-node').forEach(node => {
+    const n = (node.querySelector('.node-name')?.textContent || '').trim();
+    const l = (node.querySelector('.node-level')?.textContent || '').trim();
+    if (n === m.name && l === m.level) {
+      const col = node.closest('.org-col');
+      if (col) {
+        const parent = col.parentElement;
+        col.remove();
+        if (parent?.classList.contains('org-children') && parent.childElementCount === 0) {
+          parent.previousElementSibling?.classList.contains('org-v-line') && parent.previousElementSibling.remove();
+          parent.remove();
+        }
+        scheduleChartSave();
+        updateCounters();
+      }
+    }
+  });
+  loadHierarquia();
 }
   async function tornarMembro(idx) {
   const m = _hierData[idx];
