@@ -2183,7 +2183,10 @@ function renderHierList() {
       <td style="font-weight:600;">${m.name || '—'}</td>
       <td><span style="background:rgba(151,102,85,.1);color:var(--brown);padding:3px 8px;border-radius:20px;font-size:11px;">${m.level || '—'}</span></td>
       <td style="font-size:12px;color:var(--gray2);">${m.role || '—'}</td>
-      <td><button class="btn-outline" style="font-size:11px;padding:4px 10px;" onclick="editHierMembro(${i})">✏ Editar</button></td>
+      <td style="white-space:nowrap;">
+  <button class="btn-outline" style="font-size:11px;padding:4px 10px;margin-right:4px;" onclick="editHierMembro(${i})">✏ Editar</button>
+  <button class="btn-outline" style="font-size:11px;padding:4px 10px;color:var(--brown);" title="Tornar Membro" onclick="tornarMembro(${_hierData.indexOf(m)})">👤 Membro</button>
+</td>
     </tr>`).join('');
 }
 async function openAddMembro() {
@@ -2244,6 +2247,42 @@ async function editHierMembro(idx) {
     fprev.innerHTML = `<img src="${m.photo}" style="width:100%;height:100%;object-fit:cover;">`;
     fprev._base64 = m.photo;
   }
+}
+  async function tornarMembro(idx) {
+  const m = _hierData[idx];
+  if (!m) return;
+  if (!confirm(`Mover "${m.name}" para a lista de membros e remover do voluntariado?`)) return;
+  const { error } = await sb.from('membros').insert({
+    nome_completo:   m.name,
+    foto:            m.photo || null,
+    sexo:            m.sexo || null,
+    data_nascimento: m.nascimento || null,
+    telefone:        m.telefone || null,
+    como_conheceu:   m.como_conheceu || null,
+    ugroup_id:       m.ugroup || null,
+    created_by:      currentUser?.id
+  });
+  if (error) { alert('Erro: ' + error.message); return; }
+  // Remove do organograma
+  document.querySelectorAll('.org-node').forEach(node => {
+    const n = (node.querySelector('.node-name')?.textContent || '').trim();
+    const l = (node.querySelector('.node-level')?.textContent || '').trim();
+    if (n === m.name && l === m.level) {
+      const col = node.closest('.org-col');
+      if (col) {
+        const parent = col.parentElement;
+        col.remove();
+        if (parent?.classList.contains('org-children') && parent.childElementCount === 0) {
+          parent.previousElementSibling?.classList.contains('org-v-line') && parent.previousElementSibling.remove();
+          parent.remove();
+        }
+        scheduleChartSave();
+        updateCounters();
+      }
+    }
+  });
+  loadHierarquia();
+  alert(`✅ ${m.name} movido(a) para a lista de membros.`);
 }
 function previewHierFoto(input) {
   if (!input.files || !input.files[0]) return;
