@@ -862,6 +862,26 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 let currentUser = null;
 let currentProfile = null;
+// ── COMPRESSÃO DE IMAGEM ──
+function compressImage(file, maxPx = 300, quality = 0.75) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 // ── LAZY LOADERS ──
 function ensureXLSX() {
   return new Promise((resolve, reject) => {
@@ -1679,16 +1699,13 @@ function applyCardColor(node, hex) {
 // ═══════════════════════════════════════════════════════════
 function uploadPhoto(circle) {
   const input=document.createElement('input'); input.type='file'; input.accept='image/*';
-  input.onchange=e=>{
+  input.onchange=async e=>{
     const file=e.target.files[0]; if(!file)return;
-    const reader=new FileReader();
-    reader.onload=ev=>{
-      const img=circle.querySelector('img'); const ph=circle.querySelector('.photo-ph');
-      img.src=ev.target.result; img.style.display='block';
-      if(ph)ph.style.display='none';
-      scheduleChartSave();
-    };
-    reader.readAsDataURL(file);
+    const b64 = await compressImage(file);
+    const img=circle.querySelector('img'); const ph=circle.querySelector('.photo-ph');
+    img.src=b64; img.style.display='block';
+    if(ph)ph.style.display='none';
+    scheduleChartSave();
   };
   input.click();
 }
@@ -2353,15 +2370,12 @@ function deleteHierMembro(idx) {
   loadHierarquia();
   alert(`✅ ${m.name} movido(a) para a lista de membros.`);
 }
-function previewHierFoto(input) {
+async function previewHierFoto(input) {
   if (!input.files || !input.files[0]) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const fprev = document.getElementById('hier-foto-preview');
-    fprev.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
-    fprev._base64 = e.target.result;
-  };
-  reader.readAsDataURL(input.files[0]);
+  const b64 = await compressImage(input.files[0]);
+  const fprev = document.getElementById('hier-foto-preview');
+  fprev.innerHTML = `<img src="${b64}" style="width:100%;height:100%;object-fit:cover;">`;
+  fprev._base64 = b64;
 }
 async function saveHierMembro() {
   const nome   = document.getElementById('hier-nome').value.trim();
@@ -2646,15 +2660,12 @@ function editUGroup(id) {
   document.getElementById('modal-ugroup').style.display = 'none';
   document.getElementById('modal-ug-form').style.display = 'flex';
 }
-function previewUGFoto(input) {
+async function previewUGFoto(input) {
   if (!input.files || !input.files[0]) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    _ugEditFotoB64 = e.target.result;
-    const fp = document.getElementById('ug-lider-foto-prev');
-    fp.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
-  };
-  reader.readAsDataURL(input.files[0]);
+  const b64 = await compressImage(input.files[0]);
+  _ugEditFotoB64 = b64;
+  const fp = document.getElementById('ug-lider-foto-prev');
+  fp.innerHTML = `<img src="${b64}" style="width:100%;height:100%;object-fit:cover;">`;
 }
 async function saveUGroup() {
   const nome     = document.getElementById('ug-nome').value.trim();
@@ -2852,15 +2863,12 @@ function openEditMembro(id) {
   document.getElementById('mem-msg').textContent = '';
   document.getElementById('modal-membro').style.display = 'flex';
 }
-function previewMemFoto(input) {
+async function previewMemFoto(input) {
   if (!input.files || !input.files[0]) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    _memFotoB64 = e.target.result;
-    const fp = document.getElementById('mem-foto-preview');
-    fp.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
-  };
-  reader.readAsDataURL(input.files[0]);
+  const b64 = await compressImage(input.files[0]);
+  _memFotoB64 = b64;
+  const fp = document.getElementById('mem-foto-preview');
+  fp.innerHTML = `<img src="${b64}" style="width:100%;height:100%;object-fit:cover;">`;
 }
 // Show/hide "Outro" field
 document.addEventListener('change', e => {
