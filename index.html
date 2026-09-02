@@ -711,7 +711,7 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
               <p style="font-size:13px;font-weight:700;color:var(--text);">Departamentos</p>
               <button class="btn-submit" style="font-size:11px;padding:6px 14px;" onclick="openAddDepto()">+ Novo</button>
             </div>
-            <button class="btn-outline" style="width:100%;font-size:11px;padding:7px 10px;margin-bottom:12px;text-align:left;" onclick="syncFromOrganograma()">⬇ Importar tudo do Organograma</button>
+            <button class="btn-outline" style="width:100%;font-size:11px;padding:7px 10px;margin-bottom:12px;text-align:left;" onclick="syncFromOrganograma()">↺ Atualizar todos os departamentos</button>
             <div id="depto-list"><p style="color:var(--gray);font-size:12px;">Carregando...</p></div>
           </div>
           <div id="depto-members-panel">
@@ -3363,7 +3363,7 @@ async function renderDeptoMembers(depto) {
   h += '<p style="font-size:13px;font-weight:700;">Membros — ' + depto + '</p>';
   h += '<div style="display:flex;gap:8px;">';
   if (disponiveis.length) h += '<button class="btn-outline" style="font-size:11px;padding:5px 12px;" onclick="openAddMembroDepto(\'' + nd + '\')">+ Adicionar</button>';
-  h += '<button class="btn-outline" style="font-size:11px;padding:5px 12px;" onclick="syncFromEquipe(\'' + nd + '\')">&#8635; Sync da Equipe</button>';
+  h += '<button class="btn-outline" style="font-size:11px;padding:5px 12px;" onclick="syncFromEquipe(\'' + nd + '\')">&#8635; Atualizar</button>';
   h += '</div></div>';
   if (!lista.length) {
     h += '<p style="color:var(--gray);font-size:12px;text-align:center;padding:12px 0;">Nenhum membro ainda.<br>Use &quot;Sync da Equipe&quot; para importar do organograma.</p>';
@@ -3380,15 +3380,24 @@ async function renderDeptoMembers(depto) {
 }
 
 async function syncFromEquipe(depto) {
-  if (!_hierData.length) loadHierarquia();
-  const nomes = _hierData.map(m => m.name).filter(Boolean);
-  if (!nomes.length) { alert('Nenhum membro no organograma.'); return; }
+  loadHierarquia(); // refresh _hierData from DOM
+  const PLACEHOLDER = 'Função';
+  // Only bring in members whose role matches this department
+  const membros = _hierData.filter(m =>
+    m.name && (m.role||'').trim() === depto
+  );
+  if (!membros.length) {
+    alert('Nenhum membro com a função "' + depto + '" encontrado no organograma.\n\nVerifique se o campo Função dos nós está preenchido com exatamente "' + depto + '".');
+    return;
+  }
   let ok = 0;
-  for (const nome of nomes) {
-    const { error } = await sb.from('equipe_depto').upsert({nome, departamento: depto}, {onConflict:'nome,departamento', ignoreDuplicates:true});
+  for (const m of membros) {
+    const { error } = await sb.from('equipe_depto')
+      .upsert({ nome: m.name.trim(), departamento: depto },
+               { onConflict: 'nome,departamento', ignoreDuplicates: true });
     if (!error) ok++;
   }
-  alert(ok + ' membro(s) sincronizado(s) para "' + depto + '".');
+  alert(ok + ' membro(s) do organograma sincronizado(s) para "' + depto + '".');
   renderDeptoMembers(depto);
 }
 
@@ -3730,35 +3739,29 @@ function pubRestart() {
 
 
 async function syncFromOrganograma() {
-  // Force reload from DOM so _hierData is fresh
-  loadHierarquia();
-  // Collect unique departments from role field; ignore empty and the placeholder 'Função'
+  loadHierarquia(); // refresh _hierData from DOM
   const PLACEHOLDER = 'Função';
   const deptos = [...new Set(
     _hierData.map(m => (m.role||'').trim()).filter(r => r && r !== PLACEHOLDER)
   )].sort();
   if (!deptos.length) {
-    alert('Nenhuma função encontrada no organograma.\nVerifique se os nós têm o campo "Função" preenchido (não apenas o placeholder).');
+    alert('Nenhuma função encontrada no organograma.\nVerifique se os nós têm o campo "Função" preenchido.');
     return;
   }
-  const confirmMsg = 'Serão importados ' + deptos.length + ' departamento(s):\n\n' +
-    deptos.join('\n') + '\n\nTodos os membros com função definida também serão adicionados.\nContinuar?';
-  if (!confirm(confirmMsg)) return;
 
-  // 1. Insert departments (ignoreDuplicates requer UNIQUE em nome — rode o SQL antes)
+  // 1. Upsert departments (requer UNIQUE(nome) — rode: ALTER TABLE departamentos ADD CONSTRAINT departamentos_nome_unique UNIQUE (nome))
   let deptOk = 0;
   for (let i = 0; i < deptos.length; i++) {
     const { error } = await sb.from('departamentos')
       .upsert({ nome: deptos[i], ordem: i }, { onConflict: 'nome', ignoreDuplicates: true });
     if (!error) deptOk++;
     else {
-      // Fallback: plain insert (se ainda não tem a UNIQUE constraint)
       const { error: e2 } = await sb.from('departamentos').insert({ nome: deptos[i], ordem: i });
       if (!e2) deptOk++;
     }
   }
 
-  // 2. Upsert members into equipe_depto (only those with a real role)
+  // 2. Upsert members by role into equipe_depto
   const membros = _hierData.filter(m =>
     m.name && (m.role||'').trim() && m.role.trim() !== PLACEHOLDER
   );
@@ -3770,7 +3773,7 @@ async function syncFromOrganograma() {
     if (!error) memOk++;
   }
 
-  alert('Importação concluída!\n' + deptOk + ' departamento(s) e ' + memOk + ' membro(s) importados.');
+  alert('Atualização concluída!\n' + deptOk + ' departamento(s) e ' + memOk + ' membro(s) sincronizados.');
   await loadDeptos();
 }
 
