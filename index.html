@@ -3730,27 +3730,38 @@ function pubRestart() {
 
 
 async function syncFromOrganograma() {
-  if (!_hierData.length) loadHierarquia();
-  // Collect unique departments from role field, ignore empty/whitespace
-  const deptos = [...new Set(_hierData.map(m => (m.role||'').trim()).filter(Boolean))].sort();
+  // Force reload from DOM so _hierData is fresh
+  loadHierarquia();
+  // Collect unique departments from role field; ignore empty and the placeholder 'Função'
+  const PLACEHOLDER = 'Função';
+  const deptos = [...new Set(
+    _hierData.map(m => (m.role||'').trim()).filter(r => r && r !== PLACEHOLDER)
+  )].sort();
   if (!deptos.length) {
-    alert('Nenhuma função encontrada no organograma.\nVerifique se os nós têm o campo "Função" preenchido.');
+    alert('Nenhuma função encontrada no organograma.\nVerifique se os nós têm o campo "Função" preenchido (não apenas o placeholder).');
     return;
   }
   const confirmMsg = 'Serão importados ' + deptos.length + ' departamento(s):\n\n' +
     deptos.join('\n') + '\n\nTodos os membros com função definida também serão adicionados.\nContinuar?';
   if (!confirm(confirmMsg)) return;
 
-  // 1. Upsert departments
+  // 1. Insert departments (ignoreDuplicates requer UNIQUE em nome — rode o SQL antes)
   let deptOk = 0;
   for (let i = 0; i < deptos.length; i++) {
     const { error } = await sb.from('departamentos')
       .upsert({ nome: deptos[i], ordem: i }, { onConflict: 'nome', ignoreDuplicates: true });
     if (!error) deptOk++;
+    else {
+      // Fallback: plain insert (se ainda não tem a UNIQUE constraint)
+      const { error: e2 } = await sb.from('departamentos').insert({ nome: deptos[i], ordem: i });
+      if (!e2) deptOk++;
+    }
   }
 
-  // 2. Upsert members into equipe_depto
-  const membros = _hierData.filter(m => m.name && (m.role||'').trim());
+  // 2. Upsert members into equipe_depto (only those with a real role)
+  const membros = _hierData.filter(m =>
+    m.name && (m.role||'').trim() && m.role.trim() !== PLACEHOLDER
+  );
   let memOk = 0;
   for (const m of membros) {
     const { error } = await sb.from('equipe_depto')
