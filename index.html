@@ -707,10 +707,11 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
       <div id="escala-sub-departamentos" class="escala-subpane active">
         <div style="display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start;">
           <div>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
               <p style="font-size:13px;font-weight:700;color:var(--text);">Departamentos</p>
               <button class="btn-submit" style="font-size:11px;padding:6px 14px;" onclick="openAddDepto()">+ Novo</button>
             </div>
+            <button class="btn-outline" style="width:100%;font-size:11px;padding:7px 10px;margin-bottom:12px;text-align:left;" onclick="syncFromOrganograma()">⬇ Importar tudo do Organograma</button>
             <div id="depto-list"><p style="color:var(--gray);font-size:12px;">Carregando...</p></div>
           </div>
           <div id="depto-members-panel">
@@ -3727,6 +3728,40 @@ function pubRestart() {
   else window.location.reload();
 }
 
+
+async function syncFromOrganograma() {
+  if (!_hierData.length) loadHierarquia();
+  // Collect unique departments from role field, ignore empty/whitespace
+  const deptos = [...new Set(_hierData.map(m => (m.role||'').trim()).filter(Boolean))].sort();
+  if (!deptos.length) {
+    alert('Nenhuma função encontrada no organograma.\nVerifique se os nós têm o campo "Função" preenchido.');
+    return;
+  }
+  const confirmMsg = 'Serão importados ' + deptos.length + ' departamento(s):\n\n' +
+    deptos.join('\n') + '\n\nTodos os membros com função definida também serão adicionados.\nContinuar?';
+  if (!confirm(confirmMsg)) return;
+
+  // 1. Upsert departments
+  let deptOk = 0;
+  for (let i = 0; i < deptos.length; i++) {
+    const { error } = await sb.from('departamentos')
+      .upsert({ nome: deptos[i], ordem: i }, { onConflict: 'nome', ignoreDuplicates: true });
+    if (!error) deptOk++;
+  }
+
+  // 2. Upsert members into equipe_depto
+  const membros = _hierData.filter(m => m.name && (m.role||'').trim());
+  let memOk = 0;
+  for (const m of membros) {
+    const { error } = await sb.from('equipe_depto')
+      .upsert({ nome: m.name.trim(), departamento: m.role.trim() },
+               { onConflict: 'nome,departamento', ignoreDuplicates: true });
+    if (!error) memOk++;
+  }
+
+  alert('Importação concluída!\n' + deptOk + ' departamento(s) e ' + memOk + ' membro(s) importados.');
+  await loadDeptos();
+}
 
 // ── KICK OFF ──
 document.addEventListener('DOMContentLoaded', init);
