@@ -299,6 +299,47 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
   /* FILTROS — quebra linha */
   .dash-pane > div > div { flex-wrap: wrap; gap: 8px; }
 }
+
+/* ── ESCALA / CHECK-IN TAB ── */
+.escala-pane{max-width:1000px;margin:0 auto;padding:28px 20px 80px;}
+.escala-pane h2{font-family:'Playfair Display',serif;font-size:22px;color:var(--text);margin-bottom:4px;}
+.escala-subnav{display:flex;gap:4px;border-bottom:1.5px solid rgba(151,102,85,.15);margin-bottom:20px;flex-wrap:wrap;}
+.escala-subtab{background:transparent;border:none;padding:8px 18px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--gray);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1.5px;transition:all .15s;}
+.escala-subtab.active{color:var(--brown);border-bottom-color:var(--brown);}
+.escala-subtab:hover{color:var(--brown);}
+.escala-subpane{display:none;}
+.escala-subpane.active{display:block;}
+.depto-card{background:#fff;border-radius:12px;border:1.5px solid rgba(151,102,85,.15);padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all .15s;}
+.depto-card:hover,.depto-card.sel{border-color:var(--brown);background:var(--brown-pale);}
+.depto-card h4{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.depto-card span{font-size:11px;color:var(--gray);}
+.depto-card-btns{display:flex;gap:4px;flex-shrink:0;}
+/* QR modal */
+.qr-modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9100;display:none;align-items:center;justify-content:center;}
+.qr-modal.open{display:flex;}
+.qr-box{background:#fff;border-radius:20px;padding:32px;text-align:center;max-width:360px;width:90%;max-height:90vh;overflow-y:auto;}
+.qr-box h3{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:6px;}
+/* Status badges */
+.status-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;}
+.status-presente{background:#e8f5e9;color:#388e3c;}
+.status-faltou{background:#ffebee;color:#e53935;}
+.status-extra{background:#fff3e0;color:#f57c00;}
+/* Public form */
+#public-form-screen{position:fixed;inset:0;background:var(--bg);z-index:99999;overflow-y:auto;display:none;}
+#public-form-screen.active{display:block;}
+.pub-form-box{max-width:480px;margin:0 auto;padding:32px 20px 60px;}
+.pub-logo{width:52px;height:52px;border-radius:50%;background:var(--brown);display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;}
+.pub-logo span{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:#fff;}
+.date-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+.date-check{border:1.5px solid rgba(151,102,85,.2);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .15s;}
+.date-check:hover{border-color:var(--brown);background:var(--brown-pale);}
+.date-check input[type=checkbox]{accent-color:var(--brown);width:16px;height:16px;cursor:pointer;flex-shrink:0;}
+.date-check label{font-size:12px;font-weight:500;cursor:pointer;line-height:1.4;}
+.checkin-name-btn{width:100%;padding:13px 16px;background:#fff;border:1.5px solid rgba(151,102,85,.2);border-radius:12px;text-align:left;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.checkin-name-btn:hover{border-color:var(--brown);background:var(--brown-pale);}
+.checkin-name-btn.selected{border-color:var(--brown);background:var(--brown-pale);font-weight:700;color:var(--brown);}
+.checkin-name-btn.not-listed{border-style:dashed;color:var(--gray);}
+.checkin-name-btn.not-listed.selected{color:var(--brown);border-color:var(--brown);}
 </style>
 </head>
 <body>
@@ -329,6 +370,7 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
       <button class="nav-tab" onclick="showTab('hierarquia',this)">📋 Lista da Equipe</button>
       <button class="nav-tab" onclick="showTab('ugroups',this)">📍 uGroups</button>
       <button class="nav-tab" onclick="showTab('membros',this)">👤 Membros</button>
+      <button class="nav-tab" onclick="showTab('escala',this)">🗓 Escala</button>
       <button class="nav-tab hidden" id="tab-btn-users" onclick="showTab('usuarios',this)">⚙ Usuários</button>
       <button class="nav-tab hidden" id="tab-btn-config" onclick="showTab('config',this)">⚙ Config</button>
     </div>
@@ -344,6 +386,7 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
   <button class="nav-tab" onclick="showTab('hierarquia',this);closeMobileMenu()">📋 Lista da Equipe</button>
   <button class="nav-tab" onclick="showTab('ugroups',this);closeMobileMenu()">📍 uGroups</button>
   <button class="nav-tab" onclick="showTab('membros',this);closeMobileMenu()">👤 Membros</button>
+  <button class="nav-tab" onclick="showTab('escala',this);closeMobileMenu()">🗓 Escala</button>
   <button class="nav-tab" onclick="showTab('usuarios',this);closeMobileMenu()">👥 Usuários</button>
   <button class="nav-tab" onclick="showTab('config',this);closeMobileMenu()">⚙️ Config</button>
 </div>
@@ -639,6 +682,91 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
       </div>
     </div>
   </div>
+
+  <!-- TAB: ESCALA / CHECK-IN -->
+  <div id="pane-escala" class="tab-pane">
+    <div class="escala-pane">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+        <div>
+          <h2>Escala / Check-in</h2>
+          <p class="dash-sub">Controle de presença dos voluntários nos cultos</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:4px;">
+          <button class="btn-outline" style="font-size:11px;padding:7px 14px;" onclick="copyEscalaLink()">🔗 Copiar Link da Escala</button>
+          <button class="btn-submit" onclick="openQRModal()">📱 Gerar QR do Culto</button>
+        </div>
+      </div>
+      <div class="escala-subnav">
+        <button class="escala-subtab active" onclick="showEscalaTab('departamentos',this)">🏷 Departamentos</button>
+        <button class="escala-subtab" onclick="showEscalaTab('escala',this)">📅 Escala</button>
+        <button class="escala-subtab" onclick="showEscalaTab('relatorio',this)">📊 Relatório</button>
+      </div>
+
+      <!-- Sub: DEPARTAMENTOS -->
+      <div id="escala-sub-departamentos" class="escala-subpane active">
+        <div style="display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start;">
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <p style="font-size:13px;font-weight:700;color:var(--text);">Departamentos</p>
+              <button class="btn-submit" style="font-size:11px;padding:6px 14px;" onclick="openAddDepto()">+ Novo</button>
+            </div>
+            <div id="depto-list"><p style="color:var(--gray);font-size:12px;">Carregando...</p></div>
+          </div>
+          <div id="depto-members-panel">
+            <div class="report-card" style="padding:24px;text-align:center;">
+              <p style="color:var(--gray);font-size:13px;">Selecione um departamento para gerenciar os membros</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub: ESCALA -->
+      <div id="escala-sub-escala" class="escala-subpane">
+        <div class="report-card" style="padding:16px 20px;margin-bottom:16px;">
+          <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+            <select id="escala-filter-depto" class="login-field" onchange="renderEscalaView()" style="margin:0;max-width:200px;">
+              <option value="">Todos os departamentos</option>
+            </select>
+            <select id="escala-filter-tipo" class="login-field" onchange="renderEscalaView()" style="margin:0;max-width:180px;">
+              <option value="">Todos os cultos</option>
+              <option value="culto">Culto de Domingo</option>
+              <option value="midweek">Midweek</option>
+            </select>
+            <input type="month" id="escala-filter-mes" class="login-field" onchange="renderEscalaView()" style="margin:0;max-width:160px;">
+            <button class="btn-outline" style="font-size:11px;padding:7px 14px;" onclick="limparEscalaFiltros()">Limpar</button>
+          </div>
+        </div>
+        <div class="users-table-wrap">
+          <table class="users-table">
+            <thead><tr><th>Voluntário</th><th>Departamento</th><th>Culto</th><th>Data</th><th>Inscrito em</th></tr></thead>
+            <tbody id="escala-list"><tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:20px 16px;">Use os filtros para visualizar a escala.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sub: RELATÓRIO -->
+      <div id="escala-sub-relatorio" class="escala-subpane">
+        <div class="report-card" style="padding:16px 20px;margin-bottom:16px;">
+          <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+            <select id="rel-filter-data" class="login-field" onchange="renderRelatorio()" style="margin:0;max-width:240px;">
+              <option value="">Selecione a data do culto</option>
+            </select>
+            <select id="rel-filter-depto" class="login-field" onchange="renderRelatorio()" style="margin:0;max-width:200px;">
+              <option value="">Todos os departamentos</option>
+            </select>
+            <button class="btn-outline" style="font-size:11px;padding:7px 14px;" onclick="loadRelatorioOptions()">🔄 Atualizar</button>
+          </div>
+        </div>
+        <div id="relatorio-resumo" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;"></div>
+        <div class="users-table-wrap">
+          <table class="users-table">
+            <thead><tr><th>Voluntário</th><th>Departamento</th><th>Escalado</th><th>Check-in</th><th>Status</th></tr></thead>
+            <tbody id="relatorio-list"><tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:20px 16px;">Selecione uma data de culto acima.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 </div><!-- #app -->
 <!-- MODAL: ADICIONAR À HIERARQUIA -->
 <div id="modal-hier" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:8000;align-items:center;justify-content:center;">
@@ -824,6 +952,43 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
   </div>
 </div>
 
+
+<!-- MODAL: QR CODE DO CULTO -->
+<div id="modal-qr" class="qr-modal">
+  <div class="qr-box">
+    <button class="modal-close" onclick="closeQRModal()" style="float:right;margin-top:-8px;">×</button>
+    <h3>📱 QR Code do Culto</h3>
+    <p style="font-size:12px;color:var(--gray);margin-bottom:16px;">Gere o QR para que os voluntários façam check-in</p>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <select id="qr-tipo-sel" class="login-field" style="margin:0;flex:1;">
+        <option value="culto">Culto de Domingo</option>
+        <option value="midweek">Midweek</option>
+      </select>
+      <input type="date" id="qr-data-sel" class="login-field" style="margin:0;flex:1;">
+    </div>
+    <button class="btn-submit" style="width:100%;margin-bottom:16px;" onclick="generateQR()">Gerar QR Code</button>
+    <div id="qr-canvas" style="width:220px;height:220px;display:flex;align-items:center;justify-content:center;background:#f5f5f5;border-radius:12px;margin:0 auto 12px;font-size:12px;color:var(--gray);">QR aparece aqui</div>
+    <p id="qr-culto-label" style="font-size:11px;color:var(--gray);margin-bottom:12px;"></p>
+    <button class="btn-outline" style="width:100%;font-size:11px;" onclick="copyCheckinLink()">📋 Copiar Link de Check-in</button>
+  </div>
+</div>
+
+<!-- MODAL: NOVO DEPARTAMENTO -->
+<div id="modal-add-depto" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:8000;align-items:center;justify-content:center;">
+  <div class="modal-box" style="width:360px;">
+    <button class="modal-close" onclick="document.getElementById('modal-add-depto').style.display='none'">×</button>
+    <h3>Novo Departamento</h3>
+    <div class="form-group" style="margin-bottom:16px;">
+      <label>Nome do Departamento</label>
+      <input class="login-field" id="depto-nome-input" type="text" placeholder="Ex: Louvor, Infantil, Produção..." style="margin:0;" onkeydown="if(event.key==='Enter')saveDepto()">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-submit" onclick="saveDepto()">Salvar</button>
+      <button class="btn-outline" onclick="document.getElementById('modal-add-depto').style.display='none'">Cancelar</button>
+    </div>
+    <div id="depto-msg" class="form-success"></div>
+  </div>
+</div>
 <!-- FORMAT BAR -->
 <div id="format-bar">
   <button class="fbar-btn" id="fbar-bold" onmousedown="applyFmt(event,'bold')" ontouchstart="applyFmt(event,'bold')"><b>N</b></button>
@@ -905,6 +1070,16 @@ function ensureLeaflet() {
     document.head.appendChild(s);
   });
 }
+
+function ensureQRCode() {
+  return new Promise((resolve, reject) => {
+    if (window.QRCode) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+    s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
 // ── AUTH ──
 let _appReady = false;
 let _pendingVoluntarioId = null; // ID do membro sendo convertido a voluntário
@@ -919,6 +1094,7 @@ async function init() {
   } catch(e) {
     console.error('Erro ao restaurar sessão:', e);
   }
+  checkPublicForms();
 }
 sb.auth.onAuthStateChange(async (event, session) => {
   if (event === 'SIGNED_OUT') {
@@ -1267,6 +1443,7 @@ function showTab(id, btn) {
   if (id === 'hierarquia')  loadHierarquia();
   if (id === 'ugroups')     loadUGroups();
   if (id === 'membros')     loadMembros();
+  if (id === 'escala')      loadEscala();
 }
 // ── PROFILE MODAL ──
 function openProfile() {
@@ -3095,8 +3272,535 @@ async function savePerms() {
   else { el.style.color='#388e3c'; el.textContent='Salvo!'; setTimeout(()=>document.getElementById('modal-perms').style.display='none',800); }
 }
 
+
+
+
+// ===============================================================
+// ESCALA / CHECK-IN
+// ===============================================================
+let _deptoData = [];
+let _selectedDepto = null;
+let _qrCurrentUrl = '';
+
+function cultoDateLabel(data, tipo) {
+  if (!data) return '';
+  const d = new Date(data + 'T12:00:00');
+  const ds = d.toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'2-digit'});
+  return (tipo === 'midweek' ? 'Midweek' : 'Culto de Domingo') + ' — ' + ds;
+}
+
+async function loadEscala() {
+  await loadDeptos();
+  loadRelatorioOptions();
+}
+
+function showEscalaTab(id, btn) {
+  document.querySelectorAll('.escala-subpane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.escala-subtab').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('escala-sub-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'escala') renderEscalaView();
+  if (id === 'relatorio') renderRelatorio();
+}
+
+async function loadDeptos() {
+  const { data } = await sb.from('departamentos').select('*').order('ordem').order('nome');
+  _deptoData = data || [];
+  renderDeptoList();
+  populateDeptoSelects();
+}
+
+function renderDeptoList() {
+  const el = document.getElementById('depto-list');
+  if (!el) return;
+  if (!_deptoData.length) {
+    el.innerHTML = '<p style="color:var(--gray);font-size:12px;padding:12px 0;">Nenhum departamento. Clique em &quot;+ Novo&quot;.</p>';
+    return;
+  }
+  el.innerHTML = _deptoData.map(d => {
+    const ns = d.nome.replace(/'/g, "\\'");
+    return '<div class="depto-card ' + (_selectedDepto===d.nome?'sel':'') + '" onclick="selectDepto(\'' + ns + '\')">' +
+      '<div><h4>' + d.nome + '</h4></div>' +
+      '<div class="depto-card-btns"><button class="tbl-action-btn" style="color:#e53935;border-color:#e53935;font-size:10px;" ' +
+      'onclick="event.stopPropagation();deleteDepto(\'' + d.id + '\',\'' + ns + '\')">× Excluir</button></div></div>';
+  }).join('');
+}
+
+function populateDeptoSelects() {
+  ['escala-filter-depto','rel-filter-depto'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">Todos os departamentos</option>';
+    _deptoData.forEach(d => {
+      const o = document.createElement('option');
+      o.value = d.nome; o.textContent = d.nome; sel.appendChild(o);
+    });
+    if (cur) sel.value = cur;
+  });
+}
+
+async function selectDepto(nome) {
+  _selectedDepto = nome;
+  renderDeptoList();
+  await renderDeptoMembers(nome);
+}
+
+async function renderDeptoMembers(depto) {
+  const panel = document.getElementById('depto-members-panel');
+  panel.innerHTML = '<div class="report-card" style="padding:20px;"><p style="color:var(--gray);font-size:12px;">Carregando...</p></div>';
+  const { data: members } = await sb.from('equipe_depto').select('*').eq('departamento', depto).order('nome');
+  const lista = members || [];
+  if (!_hierData.length) loadHierarquia();
+  const naDepto = lista.map(m => m.nome);
+  const disponiveis = _hierData.map(m => m.name).filter(n => n && !naDepto.includes(n));
+  const nd = depto.replace(/'/g, "\\'");
+  let h = '<div class="report-card" style="padding:20px;">';
+  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">';
+  h += '<p style="font-size:13px;font-weight:700;">Membros — ' + depto + '</p>';
+  h += '<div style="display:flex;gap:8px;">';
+  if (disponiveis.length) h += '<button class="btn-outline" style="font-size:11px;padding:5px 12px;" onclick="openAddMembroDepto(\'' + nd + '\')">+ Adicionar</button>';
+  h += '<button class="btn-outline" style="font-size:11px;padding:5px 12px;" onclick="syncFromEquipe(\'' + nd + '\')">&#8635; Sync da Equipe</button>';
+  h += '</div></div>';
+  if (!lista.length) {
+    h += '<p style="color:var(--gray);font-size:12px;text-align:center;padding:12px 0;">Nenhum membro ainda.<br>Use &quot;Sync da Equipe&quot; para importar do organograma.</p>';
+  } else {
+    lista.forEach(m => {
+      const nm = m.nome.replace(/'/g, "\\'");
+      h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(151,102,85,.07);">';
+      h += '<span style="font-size:13px;font-weight:500;">' + m.nome + '</span>';
+      h += '<button class="tbl-action-btn" style="color:#e53935;border-color:#e53935;font-size:10px;" onclick="removeMembroDepto(\'' + nm + '\',\'' + nd + '\')">&#215; Remover</button></div>';
+    });
+  }
+  h += '</div>';
+  panel.innerHTML = h;
+}
+
+async function syncFromEquipe(depto) {
+  if (!_hierData.length) loadHierarquia();
+  const nomes = _hierData.map(m => m.name).filter(Boolean);
+  if (!nomes.length) { alert('Nenhum membro no organograma.'); return; }
+  let ok = 0;
+  for (const nome of nomes) {
+    const { error } = await sb.from('equipe_depto').upsert({nome, departamento: depto}, {onConflict:'nome,departamento', ignoreDuplicates:true});
+    if (!error) ok++;
+  }
+  alert(ok + ' membro(s) sincronizado(s) para "' + depto + '".');
+  renderDeptoMembers(depto);
+}
+
+async function openAddMembroDepto(depto) {
+  if (!_hierData.length) loadHierarquia();
+  const { data: cur } = await sb.from('equipe_depto').select('nome').eq('departamento', depto);
+  const naDepto = (cur||[]).map(m => m.nome);
+  const disponiveis = _hierData.map(m => m.name).filter(n => n && !naDepto.includes(n));
+  if (!disponiveis.length) { alert('Todos do organograma ja estao neste departamento.'); return; }
+  const escolhido = prompt('Nome para adicionar:\n\n' + disponiveis.join('\n'));
+  if (!escolhido) return;
+  const nome = disponiveis.find(n => n.toLowerCase() === escolhido.trim().toLowerCase()) || escolhido.trim();
+  await sb.from('equipe_depto').upsert({nome, departamento: depto}, {onConflict:'nome,departamento', ignoreDuplicates:true});
+  renderDeptoMembers(depto);
+}
+
+async function removeMembroDepto(nome, depto) {
+  if (!confirm('Remover "' + nome + '" do departamento "' + depto + '"?')) return;
+  await sb.from('equipe_depto').delete().eq('nome', nome).eq('departamento', depto);
+  renderDeptoMembers(depto);
+}
+
+function openAddDepto() {
+  document.getElementById('depto-nome-input').value = '';
+  document.getElementById('depto-msg').textContent = '';
+  document.getElementById('modal-add-depto').style.display = 'flex';
+  setTimeout(() => document.getElementById('depto-nome-input').focus(), 100);
+}
+
+async function saveDepto() {
+  const nome = document.getElementById('depto-nome-input').value.trim();
+  const msg  = document.getElementById('depto-msg');
+  if (!nome) { msg.style.color='#e53935'; msg.textContent='Digite o nome.'; return; }
+  const { error } = await sb.from('departamentos').insert({ nome, ordem: _deptoData.length });
+  if (error) { msg.style.color='#e53935'; msg.textContent='Erro: ' + error.message; return; }
+  document.getElementById('modal-add-depto').style.display = 'none';
+  await loadDeptos();
+  selectDepto(nome);
+}
+
+async function deleteDepto(id, nome) {
+  if (!confirm('Excluir departamento "' + nome + '"?')) return;
+  await sb.from('departamentos').delete().eq('id', id);
+  if (_selectedDepto === nome) {
+    _selectedDepto = null;
+    document.getElementById('depto-members-panel').innerHTML = '<div class="report-card" style="padding:24px;text-align:center;"><p style="color:var(--gray);font-size:13px;">Selecione um departamento</p></div>';
+  }
+  await loadDeptos();
+}
+
+async function renderEscalaView() {
+  const fDepto = document.getElementById('escala-filter-depto')?.value || '';
+  const fTipo  = document.getElementById('escala-filter-tipo')?.value  || '';
+  const fMes   = document.getElementById('escala-filter-mes')?.value   || '';
+  const tbody  = document.getElementById('escala-list');
+  tbody.innerHTML = '<tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:16px;">Carregando...</td></tr>';
+  let query = sb.from('escalas').select('*').order('culto_data').order('voluntario_nome');
+  if (fDepto) query = query.eq('departamento', fDepto);
+  if (fTipo)  query = query.eq('culto_tipo', fTipo);
+  if (fMes)   query = query.eq('mes_ano', fMes);
+  const { data } = await query;
+  if (!data || !data.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:16px;">Nenhum registro encontrado.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(r => {
+    const dt = new Date(r.culto_data+'T12:00:00').toLocaleDateString('pt-BR');
+    const ci = new Date(r.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    return '<tr><td style="font-weight:600;">' + r.voluntario_nome + '</td>' +
+      '<td><span style="background:rgba(151,102,85,.1);color:var(--brown);padding:3px 8px;border-radius:20px;font-size:11px;">' + r.departamento + '</span></td>' +
+      '<td style="font-size:12px;">' + (r.culto_tipo==='midweek'?'Midweek':'Culto de Domingo') + '</td>' +
+      '<td style="font-size:12px;">' + dt + '</td><td style="font-size:11px;color:var(--gray);">' + ci + '</td></tr>';
+  }).join('');
+}
+
+function limparEscalaFiltros() {
+  ['escala-filter-depto','escala-filter-tipo','escala-filter-mes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  renderEscalaView();
+}
+
+async function loadRelatorioOptions() {
+  const { data: ci } = await sb.from('checkins').select('culto_data,culto_tipo').order('culto_data', {ascending:false});
+  const sel = document.getElementById('rel-filter-data');
+  if (!sel) return;
+  const seen = new Set(); const cur = sel.value;
+  sel.innerHTML = '<option value="">Selecione a data do culto</option>';
+  (ci||[]).forEach(r => {
+    const key = r.culto_data+'|'+r.culto_tipo;
+    if (!seen.has(key)) { seen.add(key); const o=document.createElement('option'); o.value=key; o.textContent=cultoDateLabel(r.culto_data,r.culto_tipo); sel.appendChild(o); }
+  });
+  if (cur) sel.value = cur;
+}
+
+async function renderRelatorio() {
+  const fData  = document.getElementById('rel-filter-data')?.value  || '';
+  const fDepto = document.getElementById('rel-filter-depto')?.value || '';
+  const tbody  = document.getElementById('relatorio-list');
+  const resumo = document.getElementById('relatorio-resumo');
+  if (!fData) { tbody.innerHTML='<tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:16px;">Selecione uma data de culto acima.</td></tr>'; resumo.innerHTML=''; return; }
+  const [cultoData, cultoTipo] = fData.split('|');
+  tbody.innerHTML = '<tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:16px;">Carregando...</td></tr>';
+  let qEsc = sb.from('escalas').select('*').eq('culto_data',cultoData).eq('culto_tipo',cultoTipo);
+  let qCi  = sb.from('checkins').select('*').eq('culto_data',cultoData).eq('culto_tipo',cultoTipo);
+  if (fDepto) { qEsc=qEsc.eq('departamento',fDepto); qCi=qCi.eq('departamento',fDepto); }
+  const [{ data: escalados }, { data: checkins_r }] = await Promise.all([qEsc, qCi]);
+  const esc=escalados||[]; const ci=checkins_r||[];
+  const rows=[]; const esc_keys=new Set(esc.map(e=>e.departamento+'|'+e.voluntario_nome));
+  const ci_map={}; ci.forEach(c=>{ ci_map[c.departamento+'|'+c.voluntario_nome]=true; });
+  esc.forEach(e=>rows.push({nome:e.voluntario_nome,depto:e.departamento,escalado:true,checkin:!!ci_map[e.departamento+'|'+e.voluntario_nome],extra:false}));
+  ci.forEach(c=>{ if(!esc_keys.has(c.departamento+'|'+c.voluntario_nome)) rows.push({nome:c.voluntario_nome,depto:c.departamento,escalado:false,checkin:true,extra:true}); });
+  const presentes=rows.filter(r=>r.checkin).length;
+  const faltaram=rows.filter(r=>r.escalado&&!r.checkin).length;
+  const extras=rows.filter(r=>r.extra).length;
+  resumo.innerHTML=
+    '<div class="counter-chip"><span class="cc-num" style="font-size:16px;">'+esc.length+'</span><span class="cc-label">Escalados</span></div>'+
+    '<div class="counter-chip"><span class="cc-num" style="font-size:16px;color:#388e3c;">'+presentes+'</span><span class="cc-label">Presentes</span></div>'+
+    '<div class="counter-chip"><span class="cc-num" style="font-size:16px;color:#e53935;">'+faltaram+'</span><span class="cc-label">Faltaram</span></div>'+
+    '<div class="counter-chip"><span class="cc-num" style="font-size:16px;color:#f57c00;">'+extras+'</span><span class="cc-label">Extras</span></div>';
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:16px;">Nenhum dado para este culto.</td></tr>';return;}
+  rows.sort((a,b)=>a.depto.localeCompare(b.depto)||a.nome.localeCompare(b.nome));
+  tbody.innerHTML=rows.map(r=>{
+    const st=r.extra?'<span class="status-badge status-extra">Nao escalado</span>':r.checkin?'<span class="status-badge status-presente">Presente</span>':'<span class="status-badge status-faltou">Faltou</span>';
+    return '<tr><td style="font-weight:600;">'+r.nome+'</td><td><span style="background:rgba(151,102,85,.1);color:var(--brown);padding:3px 8px;border-radius:20px;font-size:11px;">'+r.depto+'</span></td><td>'+(r.escalado?'&#10003;':'&#8212;')+'</td><td>'+(r.checkin?'&#10003;':'&#8212;')+'</td><td>'+st+'</td></tr>';
+  }).join('');
+}
+
+async function openQRModal() {
+  document.getElementById('qr-data-sel').value = new Date().toISOString().split('T')[0];
+  document.getElementById('qr-canvas').innerHTML = '<span style="font-size:12px;color:var(--gray);">Clique em Gerar QR Code</span>';
+  document.getElementById('qr-culto-label').textContent = '';
+  _qrCurrentUrl = '';
+  document.getElementById('modal-qr').classList.add('open');
+}
+function closeQRModal() { document.getElementById('modal-qr').classList.remove('open'); }
+
+async function generateQR() {
+  const tipo = document.getElementById('qr-tipo-sel').value;
+  const data = document.getElementById('qr-data-sel').value;
+  if (!data) { alert('Selecione a data do culto.'); return; }
+  await ensureQRCode();
+  _qrCurrentUrl = window.location.origin + window.location.pathname + '?checkin=' + encodeURIComponent(data+'-'+tipo);
+  const canvas = document.getElementById('qr-canvas');
+  canvas.innerHTML = '';
+  new QRCode(canvas, {text:_qrCurrentUrl,width:220,height:220,colorDark:'#7A4F3F',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+  document.getElementById('qr-culto-label').textContent = cultoDateLabel(data, tipo);
+}
+
+function copyCheckinLink() {
+  if (!_qrCurrentUrl) { alert('Gere o QR Code primeiro.'); return; }
+  navigator.clipboard.writeText(_qrCurrentUrl).then(() => alert('Link copiado!\n\n' + _qrCurrentUrl));
+}
+function copyEscalaLink() {
+  const link = window.location.origin + window.location.pathname + '?form=escala';
+  navigator.clipboard.writeText(link).then(() => alert('Link copiado!\n\n' + link));
+}
+
+// ===============================================================
+// FORMULARIOS PUBLICOS (sem login)
+// ===============================================================
+let _pubMode = null;
+let _checkinParam = null;
+let _ciSelectedNome = null;
+let _ciEscalado = false;
+
+async function checkPublicForms() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('form') === 'escala') { _pubMode='escala'; showPublicEscalaForm(); }
+  else if (params.get('checkin')) { _pubMode='checkin'; showPublicCheckinForm(params.get('checkin')); }
+}
+
+async function loadPubSettings() {
+  try {
+    const { data } = await sb.from('settings').select('key,value').in('key',['badge','church-logo']);
+    const map = {}; (data||[]).forEach(r => map[r.key]=r.value);
+    const el = document.getElementById('pub-logo-text');
+    if (el) el.textContent = map['badge']||'untd.';
+    if (map['church-logo']&&map['church-logo'].startsWith('data:')) {
+      const lb = document.querySelector('#public-form-screen .pub-logo');
+      if (lb) lb.innerHTML = '<img src="'+map['church-logo']+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+    }
+  } catch(e) {}
+}
+
+async function loadPubDeptosFromSupabase(selectId) {
+  const sel = document.getElementById(selectId); if (!sel) return;
+  sel.innerHTML = '<option value="">Carregando...</option>';
+  const { data } = await sb.from('departamentos').select('nome').order('nome');
+  sel.innerHTML = '<option value="">Selecione o departamento...</option>';
+  (data||[]).forEach(d => { const o=document.createElement('option'); o.value=d.nome; o.textContent=d.nome; sel.appendChild(o); });
+}
+
+async function showPublicEscalaForm() {
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('app').style.display='none';
+  document.getElementById('public-form-screen').classList.add('active');
+  document.getElementById('pub-form-title').textContent='Escala de Voluntarios';
+  document.getElementById('pub-form-sub').textContent='Preencha sua disponibilidade do mes';
+  document.getElementById('pub-escala-form').style.display='';
+  document.getElementById('pub-checkin-form').style.display='none';
+  document.getElementById('pub-success').style.display='none';
+  await loadPubSettings();
+  await loadPubDeptosFromSupabase('pub-depto');
+  buildPubDateGrid();
+}
+
+async function loadPubVoluntarios() {
+  const depto = document.getElementById('pub-depto').value;
+  const grp = document.getElementById('pub-vol-group');
+  const dgp = document.getElementById('pub-datas-group');
+  if (!depto) { grp.style.display='none'; dgp.style.display='none'; return; }
+  const sel = document.getElementById('pub-voluntario');
+  sel.innerHTML = '<option value="">Carregando...</option>';
+  const { data } = await sb.from('equipe_depto').select('nome').eq('departamento',depto).order('nome');
+  sel.innerHTML = '<option value="">Selecione seu nome...</option>';
+  (data||[]).forEach(m => { const o=document.createElement('option'); o.value=m.nome; o.textContent=m.nome; sel.appendChild(o); });
+  grp.style.display=''; dgp.style.display='none';
+}
+
+function showPubDatas() {
+  if (!document.getElementById('pub-voluntario').value) { document.getElementById('pub-datas-group').style.display='none'; return; }
+  buildPubDateGrid(); document.getElementById('pub-datas-group').style.display='';
+}
+
+function buildPubDateGrid() {
+  const grid = document.getElementById('pub-datas-grid'); if (!grid) return;
+  const now = new Date(); const year=now.getFullYear(); const month=now.getMonth();
+  const dates=[]; const d=new Date(year,month,1);
+  while(d.getMonth()===month) {
+    if(d.getDay()===0) dates.push({date:new Date(d),tipo:'culto',label:'Culto de Domingo'});
+    if(d.getDay()===4) dates.push({date:new Date(d),tipo:'midweek',label:'Midweek (Quarta)'});
+    d.setDate(d.getDate()+1);
+  }
+  grid.innerHTML = dates.map(item => {
+    const ds=item.date.toISOString().split('T')[0];
+    const dl=item.date.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+    const cid='dc-'+ds+'-'+item.tipo;
+    return '<label class="date-check" for="'+cid+'"><input type="checkbox" id="'+cid+'" value="'+ds+'|'+item.tipo+'" onchange="this.closest(\'.date-check\').classList.toggle(\'checked\',this.checked)"><span><strong style="display:block">'+dl+'</strong>'+item.label+'</span></label>';
+  }).join('');
+}
+
+async function submitEscala() {
+  const depto=document.getElementById('pub-depto').value;
+  const nome=document.getElementById('pub-voluntario').value;
+  const msg=document.getElementById('pub-escala-msg');
+  if(!depto||!nome){msg.style.color='#e53935';msg.textContent='Selecione o departamento e seu nome.';return;}
+  const checked=[...document.querySelectorAll('#pub-datas-grid input[type=checkbox]:checked')];
+  if(!checked.length){msg.style.color='#e53935';msg.textContent='Selecione pelo menos uma data.';return;}
+  msg.style.color='var(--gray)';msg.textContent='Salvando...';
+  const now=new Date();
+  const mesAno=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  let ok=0;
+  for(const cb of checked){
+    const [culto_data,culto_tipo]=cb.value.split('|');
+    const {error}=await sb.from('escalas').upsert(
+      {departamento:depto,voluntario_nome:nome,culto_data,culto_tipo,mes_ano:mesAno},
+      {onConflict:'departamento,voluntario_nome,culto_data,culto_tipo',ignoreDuplicates:true}
+    );
+    if(!error) ok++;
+  }
+  document.getElementById('pub-escala-form').style.display='none';
+  document.getElementById('pub-success').style.display='';
+  document.getElementById('pub-success-title').textContent='Escala confirmada!';
+  document.getElementById('pub-success-msg').textContent=ok+' data(s) salva(s). Que Deus abencoe seu servico, '+nome.split(' ')[0]+'!';
+}
+
+async function showPublicCheckinForm(param) {
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('app').style.display='none';
+  document.getElementById('public-form-screen').classList.add('active');
+  const parts=param.split('-');
+  const cultoData=parts.slice(0,3).join('-');
+  const cultoTipo=parts[3]||'culto';
+  _checkinParam={data:cultoData,tipo:cultoTipo};
+  document.getElementById('pub-form-title').textContent='Check-in do Culto';
+  document.getElementById('pub-form-sub').textContent='Confirme sua presenca';
+  document.getElementById('pub-escala-form').style.display='none';
+  document.getElementById('pub-checkin-form').style.display='';
+  document.getElementById('pub-success').style.display='none';
+  document.getElementById('pub-checkin-culto-label').textContent=cultoDateLabel(cultoData,cultoTipo);
+  await loadPubSettings();
+  await loadPubDeptosFromSupabase('ci-depto');
+}
+
+async function loadCheckinNomes() {
+  const depto=document.getElementById('ci-depto').value;
+  const grp=document.getElementById('ci-nomes-group');
+  const list=document.getElementById('ci-nomes-list');
+  const extra=document.getElementById('ci-nome-extra');
+  const submit=document.getElementById('ci-submit-btn');
+  if(!depto){grp.style.display='none';return;}
+  _ciSelectedNome=null;_ciEscalado=false;
+  submit.style.display='none';extra.style.display='none';
+  list.innerHTML='<p style="color:var(--gray);font-size:12px;">Carregando...</p>';
+  grp.style.display='';
+  const {data}=await sb.from('escalas').select('voluntario_nome')
+    .eq('departamento',depto).eq('culto_data',_checkinParam.data)
+    .eq('culto_tipo',_checkinParam.tipo).order('voluntario_nome');
+  const nomes=(data||[]).map(r=>r.voluntario_nome);
+  let btns=nomes.map(n=>{
+    const ns=n.replace(/'/g,"\\'");
+    return '<button class="checkin-name-btn" onclick="selectCheckinNome(this,\''+ns+'\',true)"><span>'+n+'</span><span style="font-size:10px;background:rgba(151,102,85,.1);color:var(--brown);padding:2px 6px;border-radius:8px;">Escalado</span></button>';
+  }).join('');
+  btns+='<button class="checkin-name-btn not-listed" onclick="selectCheckinNome(this,\'__extra__\',false)"><span>NAO ESTOU NA ESCALA</span><span style="font-size:18px;margin-left:8px;">+</span></button>';
+  list.innerHTML=btns;
+}
+
+function selectCheckinNome(btn,nome,escalado) {
+  document.querySelectorAll('.checkin-name-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  _ciSelectedNome=nome;_ciEscalado=escalado;
+  const extra=document.getElementById('ci-nome-extra');
+  const submit=document.getElementById('ci-submit-btn');
+  if(nome==='__extra__'){extra.style.display='';submit.style.display='none';}
+  else{extra.style.display='none';submit.style.display='';}
+}
+
+async function submitCheckin() {
+  const depto=document.getElementById('ci-depto').value;
+  const msg=document.getElementById('pub-checkin-msg');
+  let nome=_ciSelectedNome;
+  if(nome==='__extra__') nome=document.getElementById('ci-nome-manual').value.trim();
+  if(!depto||!nome){msg.style.color='#e53935';msg.textContent='Preencha seu nome.';return;}
+  msg.textContent='Registrando...';
+  const {error}=await sb.from('checkins').insert({
+    culto_data:_checkinParam.data,culto_tipo:_checkinParam.tipo,
+    departamento:depto,voluntario_nome:nome,estava_escalado:_ciEscalado
+  });
+  if(error&&!(error.message||'').includes('duplicate')){msg.style.color='#e53935';msg.textContent='Erro. Tente novamente.';return;}
+  document.getElementById('pub-checkin-form').style.display='none';
+  document.getElementById('pub-success').style.display='';
+  document.getElementById('pub-success-title').textContent='Check-in realizado, '+nome.split(' ')[0]+'!';
+  document.getElementById('pub-success-msg').textContent='Presenca confirmada. Obrigado por servir!';
+}
+
+function pubRestart() {
+  if(_pubMode==='escala') showPublicEscalaForm();
+  else window.location.reload();
+}
+
+
 // ── KICK OFF ──
 document.addEventListener('DOMContentLoaded', init);
 </script>
+
+<!-- PUBLIC FORM SCREEN — acessível via URL sem login -->
+<div id="public-form-screen">
+  <div class="pub-form-box">
+    <div style="text-align:center;margin-bottom:24px;">
+      <div class="pub-logo"><span id="pub-logo-text">untd.</span></div>
+      <h2 id="pub-form-title" style="font-family:'Playfair Display',serif;font-size:24px;color:var(--text);margin-bottom:4px;"></h2>
+      <p id="pub-form-sub" style="font-size:11px;color:var(--gray);letter-spacing:1.2px;text-transform:uppercase;"></p>
+    </div>
+
+    <!-- === ESCALA FORM === -->
+    <div id="pub-escala-form">
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>Seu Departamento</label>
+        <select class="login-field" id="pub-depto" onchange="loadPubVoluntarios()" style="margin:0;">
+          <option value="">Selecione o departamento...</option>
+        </select>
+      </div>
+      <div id="pub-vol-group" style="display:none;margin-bottom:16px;">
+        <div class="form-group">
+          <label>Seu Nome</label>
+          <select class="login-field" id="pub-voluntario" onchange="showPubDatas()" style="margin:0;">
+            <option value="">Selecione seu nome...</option>
+          </select>
+        </div>
+      </div>
+      <div id="pub-datas-group" style="display:none;">
+        <div class="form-group" style="margin-bottom:8px;">
+          <label>Datas que pode servir este mês</label>
+          <p style="font-size:11px;color:var(--gray);margin-top:2px;">Selecione todas as datas disponíveis</p>
+        </div>
+        <div id="pub-datas-grid" class="date-grid"></div>
+      </div>
+      <div id="pub-escala-msg" style="margin:16px 0;min-height:18px;font-size:12px;"></div>
+      <button class="btn-submit" style="width:100%;margin-top:8px;" onclick="submitEscala()">Confirmar Escala ✓</button>
+    </div>
+
+    <!-- === CHECKIN FORM === -->
+    <div id="pub-checkin-form" style="display:none;">
+      <div style="background:var(--brown-pale);border-radius:12px;padding:12px 16px;margin-bottom:24px;text-align:center;">
+        <p style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Culto</p>
+        <p id="pub-checkin-culto-label" style="font-size:16px;font-weight:700;color:var(--brown);font-family:'Playfair Display',serif;"></p>
+      </div>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>Seu Departamento</label>
+        <select class="login-field" id="ci-depto" onchange="loadCheckinNomes()" style="margin:0;">
+          <option value="">Selecione o departamento...</option>
+        </select>
+      </div>
+      <div id="ci-nomes-group" style="display:none;">
+        <div class="form-group" style="margin-bottom:8px;">
+          <label>Selecione seu nome</label>
+          <p style="font-size:11px;color:var(--gray);margin-top:2px;">Nomes escalados para este culto aparecem em destaque</p>
+        </div>
+        <div id="ci-nomes-list"></div>
+        <div id="ci-nome-extra" style="display:none;margin-top:8px;">
+          <input class="login-field" id="ci-nome-manual" placeholder="Digite seu nome completo..." style="margin:0;" oninput="document.getElementById('ci-submit-btn').style.display=this.value.trim()?'':'none'">
+        </div>
+      </div>
+      <div id="pub-checkin-msg" style="margin:16px 0;min-height:18px;font-size:12px;"></div>
+      <button class="btn-submit" id="ci-submit-btn" style="width:100%;margin-top:8px;display:none;" onclick="submitCheckin()">Realizar Check-in ✓</button>
+    </div>
+
+    <!-- === SUCCESS === -->
+    <div id="pub-success" style="display:none;text-align:center;padding:32px 0;">
+      <div style="font-size:64px;margin-bottom:16px;">✅</div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:22px;margin-bottom:8px;" id="pub-success-title"></h3>
+      <p style="color:var(--gray);font-size:13px;" id="pub-success-msg"></p>
+      <button class="btn-outline" style="margin-top:24px;" onclick="pubRestart()">Voltar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
