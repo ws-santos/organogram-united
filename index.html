@@ -750,6 +750,13 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
       <div id="escala-sub-relatorio" class="escala-subpane">
         <div class="report-card" style="padding:16px 20px;margin-bottom:16px;">
           <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+            <select id="rel-filter-periodo" class="login-field" onchange="onPeriodoChange()" style="margin:0;max-width:180px;">
+              <option value="especifico">Data específica</option>
+              <option value="mes">Este mês</option>
+              <option value="3meses">Últimos 3 meses</option>
+              <option value="6meses">Últimos 6 meses</option>
+              <option value="todos">Todos</option>
+            </select>
             <select id="rel-filter-data" class="login-field" onchange="renderRelatorio()" style="margin:0;max-width:240px;">
               <option value="">Selecione a data do culto</option>
             </select>
@@ -777,7 +784,7 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
         <!-- Table -->
         <div class="users-table-wrap">
           <table class="users-table">
-            <thead><tr><th>Voluntário</th><th>Departamento</th><th>Escalado</th><th>Check-in</th><th>Status</th></tr></thead>
+            <thead id="relatorio-thead"><tr><th>Voluntário</th><th>Departamento</th><th>Escalado</th><th>Check-in</th><th>Status</th></tr></thead>
             <tbody id="relatorio-list"><tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:20px 16px;">Selecione uma data de culto acima.</td></tr></tbody>
           </table>
         </div>
@@ -3509,32 +3516,89 @@ async function loadRelatorioOptions() {
 // ── RELATÓRIO CHART INSTANCE ──
 let _relChartInstance = null;
 
+function onPeriodoChange() {
+  const p = document.getElementById('rel-filter-periodo')?.value || 'especifico';
+  const dateSel = document.getElementById('rel-filter-data');
+  if (dateSel) dateSel.style.display = p === 'especifico' ? '' : 'none';
+  renderRelatorio();
+}
+
+function _getPeriodStartDate(periodo) {
+  const now = new Date();
+  if (periodo === 'mes') {
+    return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+  } else if (periodo === '3meses') {
+    const d = new Date(now); d.setMonth(d.getMonth() - 3); return d.toISOString().split('T')[0];
+  } else if (periodo === '6meses') {
+    const d = new Date(now); d.setMonth(d.getMonth() - 6); return d.toISOString().split('T')[0];
+  }
+  return null; // 'todos' = sem limite
+}
+
 async function renderRelatorio() {
+  const periodo = document.getElementById('rel-filter-periodo')?.value || 'especifico';
   const fData  = document.getElementById('rel-filter-data')?.value  || '';
   const fDepto = document.getElementById('rel-filter-depto')?.value || '';
   const tbody  = document.getElementById('relatorio-list');
   const resumo = document.getElementById('relatorio-resumo');
   const dash   = document.getElementById('rel-dashboard');
-  if (!fData) {
-    tbody.innerHTML='<tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:16px;">Selecione uma data de culto acima.</td></tr>';
+  const thead  = document.getElementById('relatorio-thead');
+
+  const isRange = periodo !== 'especifico';
+  const cols    = isRange ? 6 : 5;
+
+  // Atualiza cabeçalho da tabela
+  if (thead) thead.innerHTML = isRange
+    ? '<tr><th>Culto</th><th>Voluntário</th><th>Departamento</th><th>Escalado</th><th>Check-in</th><th>Status</th></tr>'
+    : '<tr><th>Voluntário</th><th>Departamento</th><th>Escalado</th><th>Check-in</th><th>Status</th></tr>';
+
+  if (!isRange && !fData) {
+    tbody.innerHTML=`<tr><td colspan="${cols}" style="color:var(--gray);font-size:12px;padding:16px;">Selecione uma data de culto acima.</td></tr>`;
     resumo.innerHTML=''; if(dash) dash.style.display='none'; return;
   }
-  const [cultoData, cultoTipo] = fData.split('|');
-  tbody.innerHTML = '<tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:16px;">Carregando...</td></tr>';
-  let qEsc = sb.from('escalas').select('*').eq('culto_data',cultoData).eq('culto_tipo',cultoTipo);
-  let qCi  = sb.from('checkins').select('*').eq('culto_data',cultoData).eq('culto_tipo',cultoTipo);
+
+  tbody.innerHTML=`<tr><td colspan="${cols}" style="color:var(--gray);font-size:12px;padding:16px;">Carregando...</td></tr>`;
+
+  let qEsc, qCi;
+  if (isRange) {
+    const startDate = _getPeriodStartDate(periodo);
+    qEsc = sb.from('escalas').select('*');
+    qCi  = sb.from('checkins').select('*');
+    if (startDate) { qEsc=qEsc.gte('culto_data',startDate); qCi=qCi.gte('culto_data',startDate); }
+  } else {
+    const [cultoData, cultoTipo] = fData.split('|');
+    qEsc = sb.from('escalas').select('*').eq('culto_data',cultoData).eq('culto_tipo',cultoTipo);
+    qCi  = sb.from('checkins').select('*').eq('culto_data',cultoData).eq('culto_tipo',cultoTipo);
+  }
   if (fDepto) { qEsc=qEsc.eq('departamento',fDepto); qCi=qCi.eq('departamento',fDepto); }
+
   const [{ data: escalados }, { data: checkins_r }] = await Promise.all([qEsc, qCi]);
   const esc=escalados||[]; const ci=checkins_r||[];
-  const rows=[]; const esc_keys=new Set(esc.map(e=>e.departamento+'|'+e.voluntario_nome));
-  const ci_map={}; ci.forEach(c=>{ ci_map[c.departamento+'|'+c.voluntario_nome]=true; });
-  esc.forEach(e=>rows.push({nome:e.voluntario_nome,depto:e.departamento,escalado:true,checkin:!!ci_map[e.departamento+'|'+e.voluntario_nome],extra:false}));
-  ci.forEach(c=>{ if(!esc_keys.has(c.departamento+'|'+c.voluntario_nome)) rows.push({nome:c.voluntario_nome,depto:c.departamento,escalado:false,checkin:true,extra:true}); });
+
+  // Chave única inclui data+tipo para modo range
+  const makeKey = (culto_data, culto_tipo, depto, nome) => `${culto_data}|${culto_tipo}|${depto}|${nome}`;
+  const esc_keys = new Set(esc.map(e=>makeKey(e.culto_data,e.culto_tipo,e.departamento,e.voluntario_nome)));
+  const ci_map = {};
+  ci.forEach(c=>{ ci_map[makeKey(c.culto_data,c.culto_tipo,c.departamento,c.voluntario_nome)]=true; });
+
+  const rows = [];
+  esc.forEach(e=>rows.push({
+    cultoLabel:cultoDateLabel(e.culto_data,e.culto_tipo), culto_data:e.culto_data, culto_tipo:e.culto_tipo,
+    nome:e.voluntario_nome, depto:e.departamento, escalado:true,
+    checkin:!!ci_map[makeKey(e.culto_data,e.culto_tipo,e.departamento,e.voluntario_nome)], extra:false
+  }));
+  ci.forEach(c=>{
+    if(!esc_keys.has(makeKey(c.culto_data,c.culto_tipo,c.departamento,c.voluntario_nome)))
+      rows.push({
+        cultoLabel:cultoDateLabel(c.culto_data,c.culto_tipo), culto_data:c.culto_data, culto_tipo:c.culto_tipo,
+        nome:c.voluntario_nome, depto:c.departamento, escalado:false, checkin:true, extra:true
+      });
+  });
 
   const presentes=rows.filter(r=>r.checkin).length;
   const faltaram=rows.filter(r=>r.escalado&&!r.checkin).length;
   const extras=rows.filter(r=>r.extra).length;
-  const taxa = esc.length ? Math.round(presentes/esc.length*100) : 0;
+  const taxa=esc.length?Math.round(presentes/esc.length*100):0;
 
   resumo.innerHTML=
     '<div class="counter-chip"><span class="cc-num" style="font-size:16px;">'+esc.length+'</span><span class="cc-label">Escalados</span></div>'+
@@ -3543,20 +3607,25 @@ async function renderRelatorio() {
     '<div class="counter-chip"><span class="cc-num" style="font-size:16px;color:#f57c00;">'+extras+'</span><span class="cc-label">Extras</span></div>'+
     '<div class="counter-chip"><span class="cc-num" style="font-size:16px;color:var(--brown);">'+taxa+'%</span><span class="cc-label">Taxa de Presença</span></div>';
 
-  if(!rows.length){tbody.innerHTML='<tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:16px;">Nenhum dado para este culto.</td></tr>';if(dash)dash.style.display='none';return;}
+  if(!rows.length){tbody.innerHTML=`<tr><td colspan="${cols}" style="color:var(--gray);font-size:12px;padding:16px;">Nenhum dado para este período.</td></tr>`;if(dash)dash.style.display='none';return;}
 
-  // Dashboard chart
   _renderRelChart(rows);
 
-  rows.sort((a,b)=>a.depto.localeCompare(b.depto)||a.nome.localeCompare(b.nome));
+  isRange
+    ? rows.sort((a,b)=>b.culto_data.localeCompare(a.culto_data)||a.depto.localeCompare(b.depto)||a.nome.localeCompare(b.nome))
+    : rows.sort((a,b)=>a.depto.localeCompare(b.depto)||a.nome.localeCompare(b.nome));
+
   tbody.innerHTML=rows.map(r=>{
     const st=r.extra?'<span class="status-badge status-extra">Não escalado</span>':r.checkin?'<span class="status-badge status-presente">Presente</span>':'<span class="status-badge status-faltou">Faltou</span>';
-    return '<tr><td style="font-weight:600;">'+r.nome+'</td><td><span style="background:rgba(151,102,85,.1);color:var(--brown);padding:3px 8px;border-radius:20px;font-size:11px;">'+r.depto+'</span></td><td>'+(r.escalado?'&#10003;':'&#8212;')+'</td><td>'+(r.checkin?'&#10003;':'&#8212;')+'</td><td>'+st+'</td></tr>';
+    const cultoTd=isRange?`<td style="font-size:11px;color:var(--gray);white-space:nowrap;">${r.cultoLabel}</td>`:'';
+    return `<tr>${cultoTd}<td style="font-weight:600;">${r.nome}</td><td><span style="background:rgba(151,102,85,.1);color:var(--brown);padding:3px 8px;border-radius:20px;font-size:11px;">${r.depto}</span></td><td>${r.escalado?'&#10003;':'&#8212;'}</td><td>${r.checkin?'&#10003;':'&#8212;'}</td><td>${st}</td></tr>`;
   }).join('');
 
-  // Store rows for export
-  window._relRows = rows;
-  window._relMeta = { cultoData, cultoTipo, fDepto };
+  window._relRows  = rows;
+  window._relIsRange = isRange;
+  window._relMeta  = isRange
+    ? { periodo, fDepto, isRange:true }
+    : { cultoData:fData.split('|')[0], cultoTipo:fData.split('|')[1], fDepto, isRange:false };
 }
 
 function _renderRelChart(rows) {
@@ -3616,41 +3685,54 @@ function ensureSheetJS(){
 async function exportRelatorioXLSX(){
   const rows=window._relRows||[];
   const meta=window._relMeta||{};
+  const isRange=window._relIsRange||false;
   if(!rows.length){alert('Gere o relatório primeiro.');return;}
   await ensureSheetJS();
-  const data=[['Voluntário','Departamento','Escalado','Check-in','Status']];
-  rows.sort((a,b)=>a.depto.localeCompare(b.depto)||a.nome.localeCompare(b.nome));
-  rows.forEach(r=>{
-    data.push([r.nome,r.depto,r.escalado?'Sim':'Não',r.checkin?'Sim':'Não',
-      r.extra?'Não escalado':r.checkin?'Presente':'Faltou']);
+  const headers=isRange?['Culto','Voluntário','Departamento','Escalado','Check-in','Status']:['Voluntário','Departamento','Escalado','Check-in','Status'];
+  const data=[headers];
+  const sorted=[...rows].sort(isRange
+    ?(a,b)=>b.culto_data.localeCompare(a.culto_data)||a.depto.localeCompare(b.depto)||a.nome.localeCompare(b.nome)
+    :(a,b)=>a.depto.localeCompare(b.depto)||a.nome.localeCompare(b.nome));
+  sorted.forEach(r=>{
+    const row=isRange?[r.cultoLabel]:[];
+    row.push(r.nome,r.depto,r.escalado?'Sim':'Não',r.checkin?'Sim':'Não',r.extra?'Não escalado':r.checkin?'Presente':'Faltou');
+    data.push(row);
   });
   const wb=XLSX.utils.book_new();
   const ws=XLSX.utils.aoa_to_sheet(data);
-  ws['!cols']=[{wch:28},{wch:18},{wch:10},{wch:10},{wch:14}];
+  ws['!cols']=isRange?[{wch:20},{wch:28},{wch:18},{wch:10},{wch:10},{wch:14}]:[{wch:28},{wch:18},{wch:10},{wch:10},{wch:14}];
   XLSX.utils.book_append_sheet(wb,ws,'Relatório');
-  const fname='relatorio-escala-'+(meta.cultoData||'')+(meta.cultoTipo==='midweek'?'-midweek':'-culto')+'.xlsx';
+  const fname='relatorio-escala-'+(meta.periodo||meta.cultoData||'')+(meta.cultoTipo==='midweek'?'-midweek':meta.cultoTipo?'-culto':'')+'.xlsx';
   XLSX.writeFile(wb,fname);
 }
 
 function exportRelatorioPDF(){
   const rows=window._relRows||[];
   const meta=window._relMeta||{};
+  const isRange=window._relIsRange||false;
   if(!rows.length){alert('Gere o relatório primeiro.');return;}
-  const sorted=[...rows].sort((a,b)=>a.depto.localeCompare(b.depto)||a.nome.localeCompare(b.nome));
+  const sorted=[...rows].sort(isRange
+    ?(a,b)=>b.culto_data.localeCompare(a.culto_data)||a.depto.localeCompare(b.depto)||a.nome.localeCompare(b.nome)
+    :(a,b)=>a.depto.localeCompare(b.depto)||a.nome.localeCompare(b.nome));
   const presentes=rows.filter(r=>r.checkin).length;
   const faltaram=rows.filter(r=>r.escalado&&!r.checkin).length;
   const extras=rows.filter(r=>r.extra).length;
   const esc=rows.filter(r=>r.escalado).length;
   const taxa=esc?Math.round(presentes/esc*100):0;
-  const titulo=cultoDateLabel(meta.cultoData,meta.cultoTipo)+(meta.fDepto?' — '+meta.fDepto:'');
+  const periodoLabel={'mes':'Este mês','3meses':'Últimos 3 meses','6meses':'Últimos 6 meses','todos':'Todos'};
+  const titulo=isRange
+    ?(periodoLabel[meta.periodo]||meta.periodo)+(meta.fDepto?' — '+meta.fDepto:'')
+    :cultoDateLabel(meta.cultoData,meta.cultoTipo)+(meta.fDepto?' — '+meta.fDepto:'');
+  const thCulto=isRange?'<th>Culto</th>':'';
   const trs=sorted.map(r=>{
     const cor=r.extra?'#f57c00':r.checkin?'#388e3c':'#e53935';
     const status=r.extra?'Não escalado':r.checkin?'Presente':'Faltou';
-    return `<tr><td>${r.nome}</td><td>${r.depto}</td><td style="text-align:center">${r.escalado?'✓':'—'}</td><td style="text-align:center">${r.checkin?'✓':'—'}</td><td style="text-align:center;color:${cor};font-weight:600">${status}</td></tr>`;
+    const tdCulto=isRange?`<td style="font-size:11px;color:#888">${r.cultoLabel}</td>`:'';
+    return `<tr>${tdCulto}<td>${r.nome}</td><td>${r.depto}</td><td style="text-align:center">${r.escalado?'✓':'—'}</td><td style="text-align:center">${r.checkin?'✓':'—'}</td><td style="text-align:center;color:${cor};font-weight:600">${status}</td></tr>`;
   }).join('');
   const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Relatório Escala</title>
   <style>body{font-family:Arial,sans-serif;padding:32px;color:#333}h1{font-size:18px;margin:0 0 4px}p.sub{font-size:12px;color:#666;margin:0 0 20px}
-  .chips{display:flex;gap:16px;margin-bottom:24px}.chip{text-align:center;padding:10px 18px;border:1px solid #ddd;border-radius:8px}
+  .chips{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}.chip{text-align:center;padding:10px 18px;border:1px solid #ddd;border-radius:8px}
   .chip .num{font-size:22px;font-weight:700;display:block}.chip .lbl{font-size:11px;color:#666}
   table{width:100%;border-collapse:collapse;font-size:12px}th{background:#7A4F3F;color:#fff;padding:8px 10px;text-align:left}
   td{padding:7px 10px;border-bottom:1px solid #eee}tr:nth-child(even)td{background:#faf7f5}
@@ -3663,7 +3745,7 @@ function exportRelatorioPDF(){
     <div class="chip"><span class="num" style="color:#f57c00">${extras}</span><span class="lbl">Extras</span></div>
     <div class="chip"><span class="num" style="color:#7A4F3F">${taxa}%</span><span class="lbl">Taxa Presença</span></div>
   </div>
-  <table><thead><tr><th>Voluntário</th><th>Departamento</th><th>Escalado</th><th>Check-in</th><th>Status</th></tr></thead>
+  <table><thead><tr>${thCulto}<th>Voluntário</th><th>Departamento</th><th>Escalado</th><th>Check-in</th><th>Status</th></tr></thead>
   <tbody>${trs}</tbody></table>
   <script>window.onload=()=>window.print();<\/script></body></html>`;
   const w=window.open('','_blank');
