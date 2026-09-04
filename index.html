@@ -3562,9 +3562,10 @@ async function renderRelatorio() {
   let qEsc, qCi;
   if (isRange) {
     const startDate = _getPeriodStartDate(periodo);
-    qEsc = sb.from('escalas').select('*');
-    qCi  = sb.from('checkins').select('*');
-    if (startDate) { qEsc=qEsc.gte('culto_data',startDate); qCi=qCi.gte('culto_data',startDate); }
+    const today = new Date().toISOString().split('T')[0];
+qEsc = sb.from('escalas').select('*').lte('culto_data', today);
+qCi  = sb.from('checkins').select('*').lte('culto_data', today);
+if (startDate) { qEsc=qEsc.gte('culto_data',startDate); qCi=qCi.gte('culto_data',startDate); }
   } else {
     const [cultoData, cultoTipo] = fData.split('|');
     qEsc = sb.from('escalas').select('*').eq('culto_data',cultoData).eq('culto_tipo',cultoTipo);
