@@ -757,9 +757,24 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
               <option value="">Todos os departamentos</option>
             </select>
             <button class="btn-outline" style="font-size:11px;padding:7px 14px;" onclick="loadRelatorioOptions()">🔄 Atualizar</button>
+            <div style="margin-left:auto;display:flex;gap:8px;">
+              <button class="btn-outline" style="font-size:11px;padding:7px 14px;" onclick="exportRelatorioXLSX()">⬇ XLSX</button>
+              <button class="btn-outline" style="font-size:11px;padding:7px 14px;" onclick="exportRelatorioPDF()">⬇ PDF</button>
+            </div>
           </div>
         </div>
+        <!-- KPI chips -->
         <div id="relatorio-resumo" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;"></div>
+        <!-- Dashboard chart -->
+        <div id="rel-dashboard" style="display:none;margin-bottom:20px;">
+          <div class="report-card" style="padding:20px;">
+            <p style="font-size:12px;font-weight:700;color:var(--brown);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;">Presença por Departamento</p>
+            <div style="position:relative;height:220px;">
+              <canvas id="rel-chart"></canvas>
+            </div>
+          </div>
+        </div>
+        <!-- Table -->
         <div class="users-table-wrap">
           <table class="users-table">
             <thead><tr><th>Voluntário</th><th>Departamento</th><th>Escalado</th><th>Check-in</th><th>Status</th></tr></thead>
@@ -3491,12 +3506,19 @@ async function loadRelatorioOptions() {
   if (cur) sel.value = cur;
 }
 
+// ── RELATÓRIO CHART INSTANCE ──
+let _relChartInstance = null;
+
 async function renderRelatorio() {
   const fData  = document.getElementById('rel-filter-data')?.value  || '';
   const fDepto = document.getElementById('rel-filter-depto')?.value || '';
   const tbody  = document.getElementById('relatorio-list');
   const resumo = document.getElementById('relatorio-resumo');
-  if (!fData) { tbody.innerHTML='<tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:16px;">Selecione uma data de culto acima.</td></tr>'; resumo.innerHTML=''; return; }
+  const dash   = document.getElementById('rel-dashboard');
+  if (!fData) {
+    tbody.innerHTML='<tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:16px;">Selecione uma data de culto acima.</td></tr>';
+    resumo.innerHTML=''; if(dash) dash.style.display='none'; return;
+  }
   const [cultoData, cultoTipo] = fData.split('|');
   tbody.innerHTML = '<tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:16px;">Carregando...</td></tr>';
   let qEsc = sb.from('escalas').select('*').eq('culto_data',cultoData).eq('culto_tipo',cultoTipo);
@@ -3508,20 +3530,145 @@ async function renderRelatorio() {
   const ci_map={}; ci.forEach(c=>{ ci_map[c.departamento+'|'+c.voluntario_nome]=true; });
   esc.forEach(e=>rows.push({nome:e.voluntario_nome,depto:e.departamento,escalado:true,checkin:!!ci_map[e.departamento+'|'+e.voluntario_nome],extra:false}));
   ci.forEach(c=>{ if(!esc_keys.has(c.departamento+'|'+c.voluntario_nome)) rows.push({nome:c.voluntario_nome,depto:c.departamento,escalado:false,checkin:true,extra:true}); });
+
   const presentes=rows.filter(r=>r.checkin).length;
   const faltaram=rows.filter(r=>r.escalado&&!r.checkin).length;
   const extras=rows.filter(r=>r.extra).length;
+  const taxa = esc.length ? Math.round(presentes/esc.length*100) : 0;
+
   resumo.innerHTML=
     '<div class="counter-chip"><span class="cc-num" style="font-size:16px;">'+esc.length+'</span><span class="cc-label">Escalados</span></div>'+
     '<div class="counter-chip"><span class="cc-num" style="font-size:16px;color:#388e3c;">'+presentes+'</span><span class="cc-label">Presentes</span></div>'+
     '<div class="counter-chip"><span class="cc-num" style="font-size:16px;color:#e53935;">'+faltaram+'</span><span class="cc-label">Faltaram</span></div>'+
-    '<div class="counter-chip"><span class="cc-num" style="font-size:16px;color:#f57c00;">'+extras+'</span><span class="cc-label">Extras</span></div>';
-  if(!rows.length){tbody.innerHTML='<tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:16px;">Nenhum dado para este culto.</td></tr>';return;}
+    '<div class="counter-chip"><span class="cc-num" style="font-size:16px;color:#f57c00;">'+extras+'</span><span class="cc-label">Extras</span></div>'+
+    '<div class="counter-chip"><span class="cc-num" style="font-size:16px;color:var(--brown);">'+taxa+'%</span><span class="cc-label">Taxa de Presença</span></div>';
+
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="5" style="color:var(--gray);font-size:12px;padding:16px;">Nenhum dado para este culto.</td></tr>';if(dash)dash.style.display='none';return;}
+
+  // Dashboard chart
+  _renderRelChart(rows);
+
   rows.sort((a,b)=>a.depto.localeCompare(b.depto)||a.nome.localeCompare(b.nome));
   tbody.innerHTML=rows.map(r=>{
-    const st=r.extra?'<span class="status-badge status-extra">Nao escalado</span>':r.checkin?'<span class="status-badge status-presente">Presente</span>':'<span class="status-badge status-faltou">Faltou</span>';
+    const st=r.extra?'<span class="status-badge status-extra">Não escalado</span>':r.checkin?'<span class="status-badge status-presente">Presente</span>':'<span class="status-badge status-faltou">Faltou</span>';
     return '<tr><td style="font-weight:600;">'+r.nome+'</td><td><span style="background:rgba(151,102,85,.1);color:var(--brown);padding:3px 8px;border-radius:20px;font-size:11px;">'+r.depto+'</span></td><td>'+(r.escalado?'&#10003;':'&#8212;')+'</td><td>'+(r.checkin?'&#10003;':'&#8212;')+'</td><td>'+st+'</td></tr>';
   }).join('');
+
+  // Store rows for export
+  window._relRows = rows;
+  window._relMeta = { cultoData, cultoTipo, fDepto };
+}
+
+function _renderRelChart(rows) {
+  const dash = document.getElementById('rel-dashboard');
+  if(!dash || typeof Chart==='undefined') return;
+  dash.style.display='';
+
+  // Build per-dept data
+  const deptMap = {};
+  rows.forEach(r=>{
+    if(!deptMap[r.depto]) deptMap[r.depto]={escalados:0,presentes:0,faltaram:0,extras:0};
+    if(r.escalado) deptMap[r.depto].escalados++;
+    if(r.checkin && !r.extra) deptMap[r.depto].presentes++;
+    if(r.escalado && !r.checkin) deptMap[r.depto].faltaram++;
+    if(r.extra) deptMap[r.depto].extras++;
+  });
+  const labels=Object.keys(deptMap).sort();
+  const presData=labels.map(d=>deptMap[d].presentes);
+  const faltData=labels.map(d=>deptMap[d].faltaram);
+  const extData =labels.map(d=>deptMap[d].extras);
+
+  if(_relChartInstance){ _relChartInstance.destroy(); _relChartInstance=null; }
+  const ctx=document.getElementById('rel-chart').getContext('2d');
+  _relChartInstance=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Presentes', data:presData, backgroundColor:'rgba(56,142,60,.75)', borderRadius:4},
+        {label:'Faltaram',  data:faltData, backgroundColor:'rgba(229,57,53,.65)', borderRadius:4},
+        {label:'Extras',    data:extData,  backgroundColor:'rgba(245,124,0,.65)', borderRadius:4},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12,padding:14}},tooltip:{mode:'index',intersect:false}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10}}},
+        y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}}
+      }
+    }
+  });
+}
+
+// ── LAZY LOAD SHEETJS ──
+let _sheetJSLoaded=false;
+function ensureSheetJS(){
+  return new Promise((res,rej)=>{
+    if(_sheetJSLoaded||window.XLSX){_sheetJSLoaded=true;res();return;}
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=()=>{_sheetJSLoaded=true;res();}; s.onerror=rej;
+    document.head.appendChild(s);
+  });
+}
+
+async function exportRelatorioXLSX(){
+  const rows=window._relRows||[];
+  const meta=window._relMeta||{};
+  if(!rows.length){alert('Gere o relatório primeiro.');return;}
+  await ensureSheetJS();
+  const data=[['Voluntário','Departamento','Escalado','Check-in','Status']];
+  rows.sort((a,b)=>a.depto.localeCompare(b.depto)||a.nome.localeCompare(b.nome));
+  rows.forEach(r=>{
+    data.push([r.nome,r.depto,r.escalado?'Sim':'Não',r.checkin?'Sim':'Não',
+      r.extra?'Não escalado':r.checkin?'Presente':'Faltou']);
+  });
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(data);
+  ws['!cols']=[{wch:28},{wch:18},{wch:10},{wch:10},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,ws,'Relatório');
+  const fname='relatorio-escala-'+(meta.cultoData||'')+(meta.cultoTipo==='midweek'?'-midweek':'-culto')+'.xlsx';
+  XLSX.writeFile(wb,fname);
+}
+
+function exportRelatorioPDF(){
+  const rows=window._relRows||[];
+  const meta=window._relMeta||{};
+  if(!rows.length){alert('Gere o relatório primeiro.');return;}
+  const sorted=[...rows].sort((a,b)=>a.depto.localeCompare(b.depto)||a.nome.localeCompare(b.nome));
+  const presentes=rows.filter(r=>r.checkin).length;
+  const faltaram=rows.filter(r=>r.escalado&&!r.checkin).length;
+  const extras=rows.filter(r=>r.extra).length;
+  const esc=rows.filter(r=>r.escalado).length;
+  const taxa=esc?Math.round(presentes/esc*100):0;
+  const titulo=cultoDateLabel(meta.cultoData,meta.cultoTipo)+(meta.fDepto?' — '+meta.fDepto:'');
+  const trs=sorted.map(r=>{
+    const cor=r.extra?'#f57c00':r.checkin?'#388e3c':'#e53935';
+    const status=r.extra?'Não escalado':r.checkin?'Presente':'Faltou';
+    return `<tr><td>${r.nome}</td><td>${r.depto}</td><td style="text-align:center">${r.escalado?'✓':'—'}</td><td style="text-align:center">${r.checkin?'✓':'—'}</td><td style="text-align:center;color:${cor};font-weight:600">${status}</td></tr>`;
+  }).join('');
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Relatório Escala</title>
+  <style>body{font-family:Arial,sans-serif;padding:32px;color:#333}h1{font-size:18px;margin:0 0 4px}p.sub{font-size:12px;color:#666;margin:0 0 20px}
+  .chips{display:flex;gap:16px;margin-bottom:24px}.chip{text-align:center;padding:10px 18px;border:1px solid #ddd;border-radius:8px}
+  .chip .num{font-size:22px;font-weight:700;display:block}.chip .lbl{font-size:11px;color:#666}
+  table{width:100%;border-collapse:collapse;font-size:12px}th{background:#7A4F3F;color:#fff;padding:8px 10px;text-align:left}
+  td{padding:7px 10px;border-bottom:1px solid #eee}tr:nth-child(even)td{background:#faf7f5}
+  @media print{body{padding:16px}}</style></head><body>
+  <h1>Relatório de Presença</h1><p class="sub">${titulo}</p>
+  <div class="chips">
+    <div class="chip"><span class="num">${esc}</span><span class="lbl">Escalados</span></div>
+    <div class="chip"><span class="num" style="color:#388e3c">${presentes}</span><span class="lbl">Presentes</span></div>
+    <div class="chip"><span class="num" style="color:#e53935">${faltaram}</span><span class="lbl">Faltaram</span></div>
+    <div class="chip"><span class="num" style="color:#f57c00">${extras}</span><span class="lbl">Extras</span></div>
+    <div class="chip"><span class="num" style="color:#7A4F3F">${taxa}%</span><span class="lbl">Taxa Presença</span></div>
+  </div>
+  <table><thead><tr><th>Voluntário</th><th>Departamento</th><th>Escalado</th><th>Check-in</th><th>Status</th></tr></thead>
+  <tbody>${trs}</tbody></table>
+  <script>window.onload=()=>window.print();<\/script></body></html>`;
+  const w=window.open('','_blank');
+  if(w){w.document.write(html);w.document.close();}
+  else alert('Permita pop-ups para este site e tente novamente.');
 }
 
 async function openQRModal() {
