@@ -4098,7 +4098,7 @@ let _inactiveSet = new Set();
 async function loadInactiveVolunteers() {
   if (!_hierData.length) loadHierarquia();
   const volunteers = _hierData
-    .filter(m => { const l=(m.level||'').toLowerCase(); return l.includes('líder')||l.includes('lider')||l.includes('voluntário')||l.includes('voluntario'); })
+    .filter(m => { const l=(m.level||'').toLowerCase(); return l.includes('voluntário')||l.includes('voluntario'); })
     .map(m => m.name).filter(Boolean);
   if (!volunteers.length) { _inactiveSet = new Set(); return; }
   const threeMonthsAgo = new Date();
