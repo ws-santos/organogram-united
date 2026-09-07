@@ -3440,8 +3440,8 @@ async function syncFromEquipe(depto) {
   let ok = 0;
   for (const m of membros) {
     const { error } = await sb.from('equipe_depto')
-      .upsert({ nome: m.name.trim(), departamento: depto },
-               { onConflict: 'nome,departamento', ignoreDuplicates: true });
+      .upsert({ nome: m.name.trim(), departamento: depto, nivel: (m.level||'').trim() },
+               { onConflict: 'nome,departamento' });
     if (!error) ok++;
   }
   alert(ok + ' membro(s) do organograma sincronizado(s) para "' + depto + '".');
@@ -3955,10 +3955,26 @@ async function loadCheckinNomes() {
   submit.style.display='none';extra.style.display='none';
   list.innerHTML='<p style="color:var(--gray);font-size:12px;">Carregando...</p>';
   grp.style.display='';
-  const {data}=await sb.from('escalas').select('voluntario_nome')
+
+  // Busca escalados do culto
+  const {data: escData}=await sb.from('escalas').select('voluntario_nome')
     .eq('departamento',depto).eq('culto_data',_checkinParam.data)
     .eq('culto_tipo',_checkinParam.tipo).order('voluntario_nome');
-  const nomes=(data||[]).map(r=>r.voluntario_nome);
+  let nomes=(escData||[]).map(r=>r.voluntario_nome);
+
+  // Filtra por função selecionada (Líder ou Voluntário) usando equipe_depto.nivel
+  if(_ciSelectedFuncao) {
+    const keyword=_ciSelectedFuncao.toLowerCase().replace('á','a').replace('ã','a');
+    const {data: eqData}=await sb.from('equipe_depto').select('nome,nivel')
+      .eq('departamento',depto);
+    const permitidos=new Set(
+      (eqData||[])
+        .filter(r=>(r.nivel||'').toLowerCase().replace('á','a').replace('ã','a').includes(keyword))
+        .map(r=>r.nome)
+    );
+    if(permitidos.size>0) nomes=nomes.filter(n=>permitidos.has(n));
+  }
+
   let btns=nomes.map(n=>{
     const ns=n.replace(/'/g,"\\'");
     return '<button class="checkin-name-btn" onclick="selectCheckinNome(this,\''+ns+'\',true)"><span>'+n+'</span><span style="font-size:10px;background:rgba(151,102,85,.1);color:var(--brown);padding:2px 6px;border-radius:8px;">Escalado</span></button>';
@@ -4031,8 +4047,8 @@ async function syncFromOrganograma() {
   let memOk = 0;
   for (const m of membros) {
     const { error } = await sb.from('equipe_depto')
-      .upsert({ nome: m.name.trim(), departamento: m.role.trim() },
-               { onConflict: 'nome,departamento', ignoreDuplicates: true });
+      .upsert({ nome: m.name.trim(), departamento: m.role.trim(), nivel: (m.level||'').trim() },
+               { onConflict: 'nome,departamento' });
     if (!error) memOk++;
   }
 
@@ -4054,11 +4070,9 @@ async function populateFuncaoOptions(currentValue) {
     sep.disabled = true; sep.textContent = '── Por Departamento ──'; sep.dataset.dynamic = '1';
     sel.appendChild(sep);
     deptos.forEach(d => {
-      ['Líder', 'Voluntário'].forEach(f => {
-        const o = document.createElement('option');
-        o.value = `${f} · ${d}`; o.textContent = `${f} · ${d}`; o.dataset.dynamic = '1';
-        sel.appendChild(o);
-      });
+      const o = document.createElement('option');
+      o.value = d; o.textContent = d; o.dataset.dynamic = '1';
+      sel.appendChild(o);
     });
   }
   // Restore value (for edit mode)
@@ -4084,7 +4098,7 @@ let _inactiveSet = new Set();
 async function loadInactiveVolunteers() {
   if (!_hierData.length) loadHierarquia();
   const volunteers = _hierData
-    .filter(m => { const l=(m.level||'').toLowerCase(); return l.includes('voluntário')||l.includes('voluntario'); })
+    .filter(m => { const l=(m.level||'').toLowerCase(); return l.includes('líder')||l.includes('lider')||l.includes('voluntário')||l.includes('voluntario'); })
     .map(m => m.name).filter(Boolean);
   if (!volunteers.length) { _inactiveSet = new Set(); return; }
   const threeMonthsAgo = new Date();
