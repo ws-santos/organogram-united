@@ -4135,11 +4135,20 @@ function selectCheckinFuncao(funcao) {
   _ciSelectedFuncao = funcao;
   document.getElementById('ci-funcao-lider').classList.toggle('selected', funcao === 'Líder');
   document.getElementById('ci-funcao-vol').classList.toggle('selected', funcao === 'Voluntário');
-  const deptoGroup = document.getElementById('ci-depto-group');
-  deptoGroup.style.display = '';
-  // Reset downstream
-  const depto = document.getElementById('ci-depto');
-  if (depto) { depto.value = ''; }
+
+  // Filtra opções do select de departamento pelo nome
+  const deptoSel = document.getElementById('ci-depto');
+  if (deptoSel) {
+    const keyword = funcao.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+    [...deptoSel.options].forEach(o => {
+      if (!o.value) return; // mantém o placeholder
+      const name = o.value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+      o.hidden = !name.includes(keyword);
+    });
+    deptoSel.value = '';
+  }
+
+  document.getElementById('ci-depto-group').style.display = '';
   document.getElementById('ci-nomes-group').style.display = 'none';
   document.getElementById('ci-submit-btn').style.display = 'none';
   document.getElementById('pub-checkin-msg').textContent = '';
