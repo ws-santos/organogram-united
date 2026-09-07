@@ -340,6 +340,11 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .checkin-name-btn.selected{border-color:var(--brown);background:var(--brown-pale);font-weight:700;color:var(--brown);}
 .checkin-name-btn.not-listed{border-style:dashed;color:var(--gray);}
 .checkin-name-btn.not-listed.selected{color:var(--brown);border-color:var(--brown);}
+.ci-funcao-btn{flex:1;padding:14px 10px;background:#fff;border:1.5px solid rgba(151,102,85,.2);border-radius:12px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;text-align:center;}
+.ci-funcao-btn:hover{border-color:var(--brown);background:var(--brown-pale);}
+.ci-funcao-btn.selected{border-color:var(--brown);background:var(--brown-pale);color:var(--brown);}
+.inactive-badge{display:inline-block;background:#e53935;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:6px;margin-left:6px;vertical-align:middle;cursor:default;}
+.org-inactive-dot{position:absolute;top:5px;right:5px;width:10px;height:10px;background:#e53935;border-radius:50%;border:1.5px solid #fff;cursor:default;}
 </style>
 </head>
 <body>
@@ -711,7 +716,7 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
               <p style="font-size:13px;font-weight:700;color:var(--text);">Departamentos</p>
               <button class="btn-submit" style="font-size:11px;padding:6px 14px;" onclick="openAddDepto()">+ Novo</button>
             </div>
-            <button class="btn-outline" style="width:100%;font-size:11px;padding:7px 10px;margin-bottom:12px;text-align:left;" onclick="syncFromOrganograma()">↺ Atualizar todos os departamentos</button>
+            <button class="btn-outline" style="width:100%;font-size:11px;padding:7px 10px;margin-bottom:12px;text-align:left;" title="Use este botão caso haja recentes alterações no Organograma / Lista da Equipe" onclick="syncFromOrganograma()">↺ Atualizar todos os departamentos</button>
             <div id="depto-list"><p style="color:var(--gray);font-size:12px;">Carregando...</p></div>
           </div>
           <div id="depto-members-panel">
@@ -806,8 +811,26 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
       </div>
     </div>
     <div class="form-group" style="margin-bottom:12px;"><label>Nome</label><input class="login-field" id="hier-nome" type="text" placeholder="Nome completo" style="margin:0;"></div>
-    <div class="form-group" style="margin-bottom:12px;"><label>Nível (Ex: Pastor, LTP, Líder)</label><input class="login-field" id="hier-nivel" type="text" placeholder="Ex: Pastor Associado" style="margin:0;"></div>
-    <div class="form-group" style="margin-bottom:12px;"><label>Função</label><input class="login-field" id="hier-funcao" type="text" placeholder="Ex: Pastora Associada" style="margin:0;"></div>
+    <div class="form-group" style="margin-bottom:12px;"><label>Nível</label>
+      <select class="login-field" id="hier-nivel" onchange="onNivelChange()" style="margin:0;">
+        <option value="">Selecione o nível...</option>
+        <option value="Pastor de Campos">Pastor de Campos</option>
+        <option value="Pastor Associado">Pastor Associado</option>
+        <option value="LTP">LTP</option>
+        <option value="Líder">Líder</option>
+        <option value="Voluntário(a)">Voluntário(a)</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;"><label>Função</label>
+      <select class="login-field" id="hier-funcao" style="margin:0;">
+        <option value="">Selecione a função...</option>
+        <option value="Pastores de Campos">Pastores de Campos</option>
+        <option value="Pastor Associado">Pastor Associado</option>
+        <option value="Pastor">Pastor</option>
+        <option value="Pastora">Pastora</option>
+        <option value="Líder em Treinamento Pastoral">Líder em Treinamento Pastoral</option>
+      </select>
+    </div>
     <div class="form-group" style="margin-bottom:16px;"><label>Reporta a (parent no organograma)</label>
       <select class="login-field" id="hier-parent" style="margin:0;"></select>
     </div>
@@ -1464,7 +1487,7 @@ function showTab(id, btn) {
   if (toolbar) toolbar.style.display = id === 'organograma' ? '' : 'none';
   if (id === 'dashboard')   loadDashboard();
   if (id === 'usuarios')    loadUsers();
-  if (id === 'hierarquia')  loadHierarquia();
+  if (id === 'hierarquia')  { loadHierarquia(); loadInactiveVolunteers().then(()=>{ renderHierList(); markInactiveOnOrganogram(); }); }
   if (id === 'ugroups')     loadUGroups();
   if (id === 'membros')     loadMembros();
   if (id === 'escala')      loadEscala();
@@ -2443,7 +2466,7 @@ function renderHierList() {
   tbody.innerHTML = list.map((m, i) => `
     <tr>
       <td>${m.photo ? `<img src="${m.photo}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">` : '<span style="font-size:22px;">👤</span>'}</td>
-      <td style="font-weight:600;">${m.name || '—'}</td>
+      <td style="font-weight:600;">${m.name || '—'}${_inactiveSet.has(m.name)?'<span class="inactive-badge" title="Sem check-in há 3+ meses">⚠ Inativo</span>':''}</td>
       <td><span style="background:rgba(151,102,85,.1);color:var(--brown);padding:3px 8px;border-radius:20px;font-size:11px;">${m.level || '—'}</span></td>
       <td style="font-size:12px;color:var(--gray2);">${m.role || '—'}</td>
       <td style="white-space:nowrap;">
@@ -2467,6 +2490,8 @@ async function openAddMembro() {
   const fprev = document.getElementById('hier-foto-preview');
   fprev.innerHTML = '👤'; fprev.style.background = 'var(--brown-pale)';
   fprev._base64 = null;
+  // Populate funcao dynamic options
+  await populateFuncaoOptions('');
   // Populate parent dropdown
   const sel = document.getElementById('hier-parent');
   sel.innerHTML = '<option value="">— Raiz (sem pai) —</option>';
@@ -2498,7 +2523,7 @@ async function editHierMembro(idx) {
   document.getElementById('hier-edit-id').value = idx;
   document.getElementById('hier-nome').value    = m.name  || '';
   document.getElementById('hier-nivel').value   = m.level || '';
-  document.getElementById('hier-funcao').value  = m.role  || '';
+  await populateFuncaoOptions(m.role || '');
   document.getElementById('hier-parent').value  = m.parentName || '';
   // Extra fields
   document.getElementById('hier-sexo').value  = m.sexo          || '';
@@ -3907,6 +3932,14 @@ async function showPublicCheckinForm(param) {
   document.getElementById('pub-checkin-form').style.display='';
   document.getElementById('pub-success').style.display='none';
   document.getElementById('pub-checkin-culto-label').textContent=cultoDateLabel(cultoData,cultoTipo);
+  // Reset função step
+  _ciSelectedFuncao = null;
+  document.getElementById('ci-funcao-lider').classList.remove('selected');
+  document.getElementById('ci-funcao-vol').classList.remove('selected');
+  document.getElementById('ci-depto-group').style.display = 'none';
+  document.getElementById('ci-nomes-group').style.display = 'none';
+  document.getElementById('ci-submit-btn').style.display = 'none';
+  document.getElementById('pub-checkin-msg').textContent = '';
   await loadPubSettings();
   await loadPubDeptosFromSupabase('ci-depto');
 }
@@ -4007,6 +4040,97 @@ async function syncFromOrganograma() {
   await loadDeptos();
 }
 
+// ── NÍVEL / FUNÇÃO SELECT HELPERS ──
+async function populateFuncaoOptions(currentValue) {
+  const sel = document.getElementById('hier-funcao');
+  if (!sel) return;
+  // Remove dynamic options (data-dynamic)
+  [...sel.options].forEach(o => { if (o.dataset.dynamic) o.remove(); });
+  // Load departments
+  const { data } = await sb.from('departamentos').select('nome').order('nome');
+  const deptos = (data || []).map(d => d.nome);
+  if (deptos.length) {
+    const sep = document.createElement('option');
+    sep.disabled = true; sep.textContent = '── Por Departamento ──'; sep.dataset.dynamic = '1';
+    sel.appendChild(sep);
+    deptos.forEach(d => {
+      ['Líder', 'Voluntário'].forEach(f => {
+        const o = document.createElement('option');
+        o.value = `${f} · ${d}`; o.textContent = `${f} · ${d}`; o.dataset.dynamic = '1';
+        sel.appendChild(o);
+      });
+    });
+  }
+  // Restore value (for edit mode)
+  if (currentValue) {
+    sel.value = currentValue;
+    if (!sel.value) {
+      // Value not found in options — add it as custom
+      const o = document.createElement('option');
+      o.value = currentValue; o.textContent = currentValue; o.dataset.dynamic = '1';
+      sel.insertBefore(o, sel.options[1]);
+      sel.value = currentValue;
+    }
+  }
+}
+
+function onNivelChange() {
+  // Future: filter funcao options by nivel if needed
+}
+
+// ── INATIVIDADE (3+ meses sem check-in) ──
+let _inactiveSet = new Set();
+
+async function loadInactiveVolunteers() {
+  if (!_hierData.length) loadHierarquia();
+  const volunteers = _hierData
+    .filter(m => { const l=(m.level||'').toLowerCase(); return l.includes('líder')||l.includes('lider')||l.includes('voluntário')||l.includes('voluntario'); })
+    .map(m => m.name).filter(Boolean);
+  if (!volunteers.length) { _inactiveSet = new Set(); return; }
+  const threeMonthsAgo = new Date();
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+  const startDate = threeMonthsAgo.toISOString().split('T')[0];
+  const today = new Date().toISOString().split('T')[0];
+  const { data } = await sb.from('checkins').select('voluntario_nome')
+    .gte('culto_data', startDate).lte('culto_data', today);
+  const activeSet = new Set((data || []).map(r => r.voluntario_nome));
+  _inactiveSet = new Set(volunteers.filter(n => !activeSet.has(n)));
+}
+
+function markInactiveOnOrganogram() {
+  document.querySelectorAll('.org-node').forEach(node => {
+    // Remove existing dot
+    node.querySelectorAll('.org-inactive-dot').forEach(d => d.remove());
+    const nameEl = node.querySelector('.node-name');
+    if (!nameEl) return;
+    const name = nameEl.textContent.trim();
+    if (_inactiveSet.has(name)) {
+      const dot = document.createElement('div');
+      dot.className = 'org-inactive-dot';
+      dot.title = '⚠ Sem check-in há 3+ meses';
+      node.style.position = 'relative';
+      node.appendChild(dot);
+    }
+  });
+}
+
+// ── CHECK-IN FUNÇÃO STEP ──
+let _ciSelectedFuncao = null;
+
+function selectCheckinFuncao(funcao) {
+  _ciSelectedFuncao = funcao;
+  document.getElementById('ci-funcao-lider').classList.toggle('selected', funcao === 'Líder');
+  document.getElementById('ci-funcao-vol').classList.toggle('selected', funcao === 'Voluntário');
+  const deptoGroup = document.getElementById('ci-depto-group');
+  deptoGroup.style.display = '';
+  // Reset downstream
+  const depto = document.getElementById('ci-depto');
+  if (depto) { depto.value = ''; }
+  document.getElementById('ci-nomes-group').style.display = 'none';
+  document.getElementById('ci-submit-btn').style.display = 'none';
+  document.getElementById('pub-checkin-msg').textContent = '';
+}
+
 // ── KICK OFF ──
 document.addEventListener('DOMContentLoaded', init);
 </script>
@@ -4053,12 +4177,22 @@ document.addEventListener('DOMContentLoaded', init);
         <p style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Culto</p>
         <p id="pub-checkin-culto-label" style="font-size:16px;font-weight:700;color:var(--brown);font-family:'Playfair Display',serif;"></p>
       </div>
-      <div class="form-group" style="margin-bottom:16px;">
+      <!-- Passo 1: Função -->
+      <div class="form-group" style="margin-bottom:20px;">
+        <label style="margin-bottom:8px;display:block;">Qual é a sua função?</label>
+        <div style="display:flex;gap:10px;">
+          <button id="ci-funcao-lider" class="ci-funcao-btn" onclick="selectCheckinFuncao('Líder')">👑 Líder</button>
+          <button id="ci-funcao-vol" class="ci-funcao-btn" onclick="selectCheckinFuncao('Voluntário')">🙋 Voluntário(a)</button>
+        </div>
+      </div>
+      <!-- Passo 2: Departamento -->
+      <div id="ci-depto-group" class="form-group" style="display:none;margin-bottom:16px;">
         <label>Seu Departamento</label>
         <select class="login-field" id="ci-depto" onchange="loadCheckinNomes()" style="margin:0;">
           <option value="">Selecione o departamento...</option>
         </select>
       </div>
+      <!-- Passo 3: Nome -->
       <div id="ci-nomes-group" style="display:none;">
         <div class="form-group" style="margin-bottom:8px;">
           <label>Selecione seu nome</label>
