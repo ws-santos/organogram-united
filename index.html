@@ -3926,12 +3926,16 @@ async function loadPubSettings() {
   } catch(e) {}
 }
 
+let _pubDeptosList = []; // cache global de departamentos para o checkin
+
 async function loadPubDeptosFromSupabase(selectId) {
   const sel = document.getElementById(selectId); if (!sel) return;
   sel.innerHTML = '<option value="">Carregando...</option>';
   const { data } = await sb.from('departamentos').select('nome').order('nome');
+  const nomes = (data||[]).map(d => d.nome);
+  if (selectId === 'ci-depto') _pubDeptosList = nomes; // salva para filtro mobile
   sel.innerHTML = '<option value="">Selecione o departamento...</option>';
-  (data||[]).forEach(d => { const o=document.createElement('option'); o.value=d.nome; o.textContent=d.nome; sel.appendChild(o); });
+  nomes.forEach(n => { const o=document.createElement('option'); o.value=n; o.textContent=n; sel.appendChild(o); });
 }
 
 async function showPublicEscalaForm() {
@@ -4226,15 +4230,15 @@ function selectCheckinFuncao(funcao) {
   document.getElementById('ci-funcao-lider').classList.toggle('selected', funcao === 'Líder');
   document.getElementById('ci-funcao-vol').classList.toggle('selected', funcao === 'Voluntário');
 
-  // Filtra opções do select de departamento pelo nome
+  // Reconstrói o select com apenas os departamentos que batem com a função
+  // (option.hidden não funciona no iOS/Android — remover e recriar é a forma correta)
   const deptoSel = document.getElementById('ci-depto');
   if (deptoSel) {
-    const keyword = funcao.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
-    [...deptoSel.options].forEach(o => {
-      if (!o.value) return; // mantém o placeholder
-      const name = o.value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
-      o.hidden = !name.includes(keyword);
-    });
+    const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+    const keyword = norm(funcao);
+    const filtrados = _pubDeptosList.filter(n => norm(n).includes(keyword));
+    deptoSel.innerHTML = '<option value="">Selecione o departamento...</option>';
+    filtrados.forEach(n => { const o=document.createElement('option'); o.value=n; o.textContent=n; deptoSel.appendChild(o); });
     deptoSel.value = '';
   }
 
