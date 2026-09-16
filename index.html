@@ -701,7 +701,7 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
           <p class="dash-sub">Controle de presença dos voluntários nos cultos</p>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:4px;">
-          <button class="btn-outline" style="font-size:11px;padding:7px 14px;" onclick="copyEscalaLink()">🔗 Copiar Link da Escala</button>
+          <button class="btn-outline" style="font-size:11px;padding:7px 14px;" onclick="openEscalaLinkModal()">🔗 Link do formulário de Escala</button>
           <button class="btn-submit" onclick="openQRModal()">📱 Gerar QR do Culto</button>
         </div>
       </div>
@@ -3894,9 +3894,21 @@ function copyCheckinLink() {
   if (!_qrCurrentUrl) { alert('Gere o QR Code primeiro.'); return; }
   navigator.clipboard.writeText(_qrCurrentUrl).then(() => alert('Link copiado!\n\n' + _qrCurrentUrl));
 }
-function copyEscalaLink() {
-  const link = window.location.origin + window.location.pathname + '?form=escala';
-  navigator.clipboard.writeText(link).then(() => alert('Link copiado!\n\n' + link));
+function openEscalaLinkModal() {
+  const now = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const defaultMes = next.getFullYear() + '-' + String(next.getMonth() + 1).padStart(2, '0');
+  document.getElementById('escala-link-mes').value = defaultMes;
+  document.getElementById('modal-escala-link').style.display = 'flex';
+}
+function closeEscalaLinkModal() {
+  document.getElementById('modal-escala-link').style.display = 'none';
+}
+function confirmCopyEscalaLink() {
+  const mes = document.getElementById('escala-link-mes').value;
+  if (!mes) { alert('Selecione o mês.'); return; }
+  const link = window.location.origin + window.location.pathname + '?form=escala&mes=' + mes;
+  navigator.clipboard.writeText(link).then(() => { closeEscalaLinkModal(); alert('Link copiado!\n\n' + link); });
 }
 
 // ===============================================================
@@ -3927,6 +3939,7 @@ async function loadPubSettings() {
 }
 
 let _pubDeptosList = []; // cache global de departamentos para o checkin
+let _pubEscalaDeptosList = []; // cache global de departamentos para a escala
 
 async function loadPubDeptosFromSupabase(selectId) {
   const sel = document.getElementById(selectId); if (!sel) return;
@@ -3934,19 +3947,32 @@ async function loadPubDeptosFromSupabase(selectId) {
   const { data } = await sb.from('departamentos').select('nome').order('nome');
   const nomes = (data||[]).map(d => d.nome);
   if (selectId === 'ci-depto') _pubDeptosList = nomes; // salva para filtro mobile
+  if (selectId === 'pub-depto') _pubEscalaDeptosList = nomes; // salva para filtro escala
   sel.innerHTML = '<option value="">Selecione o departamento...</option>';
   nomes.forEach(n => { const o=document.createElement('option'); o.value=n; o.textContent=n; sel.appendChild(o); });
 }
+
+let _pubEscalaMes = null; // mês selecionado para a escala (YYYY-MM)
 
 async function showPublicEscalaForm() {
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('app').style.display='none';
   document.getElementById('public-form-screen').classList.add('active');
+  // Lê mês do parâmetro URL se existir
+  const urlParams = new URLSearchParams(window.location.search);
+  _pubEscalaMes = urlParams.get('mes') || null;
   document.getElementById('pub-form-title').textContent='Escala de Voluntarios';
   document.getElementById('pub-form-sub').textContent='Preencha sua disponibilidade do mes';
   document.getElementById('pub-escala-form').style.display='';
   document.getElementById('pub-checkin-form').style.display='none';
   document.getElementById('pub-success').style.display='none';
+  // Reset função step
+  _escalaSelectedFuncao = null;
+  document.getElementById('escala-funcao-lider').classList.remove('selected');
+  document.getElementById('escala-funcao-vol').classList.remove('selected');
+  document.getElementById('pub-depto-group').style.display = 'none';
+  document.getElementById('pub-vol-group').style.display = 'none';
+  document.getElementById('pub-datas-group').style.display = 'none';
   await loadPubSettings();
   await loadPubDeptosFromSupabase('pub-depto');
   buildPubDateGrid();
@@ -3972,7 +3998,13 @@ function showPubDatas() {
 
 function buildPubDateGrid() {
   const grid = document.getElementById('pub-datas-grid'); if (!grid) return;
-  const now = new Date(); const year=now.getFullYear(); const month=now.getMonth();
+  let year, month;
+  if (_pubEscalaMes) { const [y,m]=_pubEscalaMes.split('-').map(Number); year=y; month=m-1; }
+  else { const now=new Date(); year=now.getFullYear(); month=now.getMonth(); }
+  // Atualiza label com o nome do mês
+  const mesLabel = new Date(year, month, 1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  const labelEl = document.querySelector('#pub-datas-group label');
+  if (labelEl) labelEl.textContent = 'Datas que pode servir em ' + mesLabel;
   const dates=[]; const d=new Date(year,month,1);
   while(d.getMonth()===month) {
     if(d.getDay()===0) dates.push({date:new Date(d),tipo:'culto',label:'Culto de Domingo'});
@@ -3996,7 +4028,7 @@ async function submitEscala() {
   if(!checked.length){msg.style.color='#e53935';msg.textContent='Selecione pelo menos uma data.';return;}
   msg.style.color='var(--gray)';msg.textContent='Salvando...';
   const now=new Date();
-  const mesAno=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const mesAno=_pubEscalaMes||(now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0'));
   let ok=0;
   for(const cb of checked){
     const [culto_data,culto_tipo]=cb.value.split('|');
@@ -4222,6 +4254,30 @@ function markInactiveOnOrganogram() {
   });
 }
 
+// ── ESCALA FUNÇÃO STEP ──
+let _escalaSelectedFuncao = null;
+
+function selectEscalaFuncao(funcao) {
+  _escalaSelectedFuncao = funcao;
+  document.getElementById('escala-funcao-lider').classList.toggle('selected', funcao === 'Líder');
+  document.getElementById('escala-funcao-vol').classList.toggle('selected', funcao === 'Voluntário');
+
+  const deptoSel = document.getElementById('pub-depto');
+  if (deptoSel) {
+    const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+    const keyword = norm(funcao);
+    const filtrados = _pubEscalaDeptosList.filter(n => norm(n).includes(keyword));
+    deptoSel.innerHTML = '<option value="">Selecione o departamento...</option>';
+    filtrados.forEach(n => { const o=document.createElement('option'); o.value=n; o.textContent=n; deptoSel.appendChild(o); });
+    deptoSel.value = '';
+  }
+
+  document.getElementById('pub-depto-group').style.display = '';
+  document.getElementById('pub-vol-group').style.display = 'none';
+  document.getElementById('pub-datas-group').style.display = 'none';
+  document.getElementById('pub-escala-msg').textContent = '';
+}
+
 // ── CHECK-IN FUNÇÃO STEP ──
 let _ciSelectedFuncao = null;
 
@@ -4252,6 +4308,22 @@ function selectCheckinFuncao(funcao) {
 document.addEventListener('DOMContentLoaded', init);
 </script>
 
+<!-- MODAL: Seleção de mês para link da escala -->
+<div id="modal-escala-link" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:var(--card);border-radius:16px;padding:28px 24px;width:340px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,.18);">
+    <h3 style="font-family:'Playfair Display',serif;font-size:18px;margin:0 0 6px;">Link da Escala</h3>
+    <p style="font-size:12px;color:var(--gray);margin:0 0 20px;">Selecione o mês antes de copiar o link</p>
+    <div class="form-group" style="margin-bottom:20px;">
+      <label style="font-size:12px;color:var(--gray);">Mês de referência</label>
+      <input type="month" id="escala-link-mes" class="login-field" style="margin:0;">
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-submit" style="flex:1;" onclick="confirmCopyEscalaLink()">🔗 Copiar Link</button>
+      <button class="btn-outline" style="flex:1;" onclick="closeEscalaLinkModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- PUBLIC FORM SCREEN — acessível via URL sem login -->
 <div id="public-form-screen">
   <div class="pub-form-box">
@@ -4263,7 +4335,16 @@ document.addEventListener('DOMContentLoaded', init);
 
     <!-- === ESCALA FORM === -->
     <div id="pub-escala-form">
-      <div class="form-group" style="margin-bottom:16px;">
+      <!-- Passo 1: Função -->
+      <div class="form-group" style="margin-bottom:20px;">
+        <label style="margin-bottom:8px;display:block;">Qual é a sua função?</label>
+        <div style="display:flex;gap:10px;">
+          <button id="escala-funcao-lider" class="ci-funcao-btn" onclick="selectEscalaFuncao('Líder')">👑 Líder</button>
+          <button id="escala-funcao-vol" class="ci-funcao-btn" onclick="selectEscalaFuncao('Voluntário')">🙋 Voluntário(a)</button>
+        </div>
+      </div>
+      <!-- Passo 2: Departamento -->
+      <div id="pub-depto-group" class="form-group" style="display:none;margin-bottom:16px;">
         <label>Seu Departamento</label>
         <select class="login-field" id="pub-depto" onchange="loadPubVoluntarios()" style="margin:0;">
           <option value="">Selecione o departamento...</option>
