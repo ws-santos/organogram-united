@@ -3988,12 +3988,30 @@ async function loadPubVoluntarios() {
   const { data } = await sb.from('equipe_depto').select('nome').eq('departamento',depto).order('nome');
   sel.innerHTML = '<option value="">Selecione seu nome...</option>';
   (data||[]).forEach(m => { const o=document.createElement('option'); o.value=m.nome; o.textContent=m.nome; sel.appendChild(o); });
+  const oManual=document.createElement('option'); oManual.value='__manual__'; oManual.textContent='✏️ Não encontrei meu nome'; sel.appendChild(oManual);
+  document.getElementById('pub-nome-manual-group').style.display='none';
+  document.getElementById('pub-nome-manual').value='';
   grp.style.display=''; dgp.style.display='none';
 }
 
 function showPubDatas() {
-  if (!document.getElementById('pub-voluntario').value) { document.getElementById('pub-datas-group').style.display='none'; return; }
+  const val = document.getElementById('pub-voluntario').value;
+  const manualGrp = document.getElementById('pub-nome-manual-group');
+  if (val === '__manual__') {
+    manualGrp.style.display = '';
+    document.getElementById('pub-nome-manual').value = '';
+    document.getElementById('pub-datas-group').style.display = 'none';
+    return;
+  }
+  manualGrp.style.display = 'none';
+  if (!val) { document.getElementById('pub-datas-group').style.display='none'; return; }
   buildPubDateGrid(); document.getElementById('pub-datas-group').style.display='';
+}
+
+function showPubDatasManual() {
+  const nome = document.getElementById('pub-nome-manual').value.trim();
+  if (nome.length >= 2) { buildPubDateGrid(); document.getElementById('pub-datas-group').style.display=''; }
+  else { document.getElementById('pub-datas-group').style.display='none'; }
 }
 
 function buildPubDateGrid() {
@@ -4021,7 +4039,8 @@ function buildPubDateGrid() {
 
 async function submitEscala() {
   const depto=document.getElementById('pub-depto').value;
-  const nome=document.getElementById('pub-voluntario').value;
+  const volSel=document.getElementById('pub-voluntario').value;
+  const nome=volSel==='__manual__'?document.getElementById('pub-nome-manual').value.trim():volSel;
   const msg=document.getElementById('pub-escala-msg');
   if(!depto||!nome){msg.style.color='#e53935';msg.textContent='Selecione o departamento e seu nome.';return;}
   const checked=[...document.querySelectorAll('#pub-datas-grid input[type=checkbox]:checked')];
@@ -4356,6 +4375,12 @@ document.addEventListener('DOMContentLoaded', init);
           <select class="login-field" id="pub-voluntario" onchange="showPubDatas()" style="margin:0;">
             <option value="">Selecione seu nome...</option>
           </select>
+        </div>
+        <div id="pub-nome-manual-group" style="display:none;margin-top:12px;">
+          <div class="form-group">
+            <label>Digite seu nome completo</label>
+            <input type="text" class="login-field" id="pub-nome-manual" placeholder="Ex: João Silva..." style="margin:0;" oninput="showPubDatasManual()">
+          </div>
         </div>
       </div>
       <div id="pub-datas-group" style="display:none;">
