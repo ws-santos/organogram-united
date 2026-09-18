@@ -744,6 +744,7 @@ main{padding:20px 0 110px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
             </select>
             <input type="month" id="escala-filter-mes" class="login-field" onchange="renderEscalaView()" style="margin:0;max-width:160px;">
             <button class="btn-outline" style="font-size:11px;padding:7px 14px;" onclick="limparEscalaFiltros()">Limpar</button>
+            <button class="btn-outline" style="font-size:11px;padding:7px 14px;" onclick="exportEscalaXLSX()">⬇ Exportar XLSX</button>
           </div>
         </div>
         <div class="users-table-wrap">
@@ -3628,6 +3629,38 @@ async function loadRelatorioOptions() {
   if (cur) sel.value = cur;
 }
 
+async function exportEscalaXLSX() {
+  // Lê os mesmos filtros da tela
+  const fDepto = document.getElementById('escala-filter-depto')?.value || '';
+  const fTipo  = document.getElementById('escala-filter-tipo')?.value  || '';
+  const fMes   = document.getElementById('escala-filter-mes')?.value   || '';
+
+  // Busca no Supabase (igual ao renderEscalaView)
+  let query = sb.from('escalas').select('*').order('culto_data').order('voluntario_nome');
+  if (fDepto) query = query.eq('departamento', fDepto);
+  if (fTipo)  query = query.eq('culto_tipo', fTipo);
+  if (fMes)   query = query.eq('mes_ano', fMes);
+  const { data } = await query;
+
+  if (!data || !data.length) { alert('Nenhum dado para exportar.'); return; }
+
+  await ensureSheetJS(); // já existe no app — carrega o SheetJS
+
+  // Monta as linhas
+  const rows = [['Voluntário', 'Departamento', 'Culto', 'Data', 'Mês']];
+  data.forEach(r => {
+    const dt = new Date(r.culto_data+'T12:00:00').toLocaleDateString('pt-BR');
+    const culto = r.culto_tipo === 'midweek' ? 'Midweek' : 'Culto de Domingo';
+    rows.push([r.voluntario_nome, r.departamento, culto, dt, r.mes_ano]);
+  });
+
+  // Gera o arquivo
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:24},{wch:28},{wch:18},{wch:12},{wch:10}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Escala');
+  XLSX.writeFile(wb, 'escala-' + (fMes||'todos') + (fDepto?'-'+fDepto:'') + '.xlsx');
+}
 // ── RELATÓRIO CHART INSTANCE ──
 let _relChartInstance = null;
 
